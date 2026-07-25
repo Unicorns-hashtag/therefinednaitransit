@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Nai's Transit</title>
+    <link rel="stylesheet" href="/assets/css/sidebar.css">
+    <link rel="stylesheet" href="/assets/css/dash.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- SIDEBAR  -->
+    <button id="menuBtn">≡</button>
+    <div id="overlay"></div>
+    <div class="sidebar">
+        <h2>Nai's Transit</h2>
+        <ul>
+            <li class="active"><a href="/admin/dashboard.html">Dashboard</a></li>
+            <li><a href="/admin/routes.html">Routes</a></li>
+            <li><a href="/admin/fares.html">Fares</a></li>
+            <li><a href="/admin/vehicles.html">Vehicles</a></li>
+            <li><a href="/admin/passenger.html">Passengers</a></li>
+            <li><a href="/admin/report.html">Reports</a></li>
+            <li><a href="/admin/settings.html">Settings</a></li>
+        </ul>
+        <a href="/admin/login.html" class="logout">Logout</a>
+    </div>
+    <!-- MAIN CONTENT  -->
+    <div class="main">
+        <!-- TOP BAR  -->
+        <div class="topbar">
+            <h3>Dashboard</h3>
+            <div class="top-actions">
+                <span class="notification">🔔</span>
+                <div class="user">
+                    Admin
+                </div>
+            </div>
+        </div>
+        <!-- STAT CARDS -->
+        <div class="cards">
+            <div class="card">
+                <h4>Total Routes</h4>
+                <p class="counter" id="routeCount">0</p>
+            </div>
+            <div class="card">
+                <h4>Total Vehicles</h4>
+                <p class="counter" id="vehicleCount">0</p>
+            </div>
+            <div class="card">
+                <h4>Total Passengers</h4>
+                <p class="counter" id="passengerCount">0</p>
+            </div>
+            <div class="card">
+                <h4>Revenue</h4>
+                <p class="counter" id="fareCount">0</p>
+            </div>
+        </div>
+        <!-- CONTENT SECTION  -->
+        <div class="content">
+            <div class="box">
+                <h3>Revenue Chart</h3>
+                <p><canvas id="revenueChart"></canvas></p>
+            </div>
+            <div class="box">
+                <h3>Recent Activities</h3>
+                <ul class="activities" id="activityList">
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="/assets/javascript/activity.js"></script>
+    <script>
+
+        // ======================
+        // LOAD DATA
+        // ======================
+
+        const routes = JSON.parse(localStorage.getItem("routes")) || [];
+        const vehicles = JSON.parse(localStorage.getItem("vehicles")) || [];
+        const passengers = JSON.parse(localStorage.getItem("passengers")) || [];
+        const fares = JSON.parse(localStorage.getItem("fares")) || [];
+
+        // ======================
+        // UPDATE DASHBOARD CARDS
+        // ======================
+
+        document.getElementById("routeCount").textContent = routes.length;
+        document.getElementById("vehicleCount").textContent = vehicles.length;
+        document.getElementById("passengerCount").textContent = passengers.length;
+
+        // Calculate total revenue
+
+        let totalRevenue = 0;
+
+        const labels = [];
+        const revenueData = [];
+
+        fares.forEach(fare => {
+
+            const passengerCount =
+                passengers.filter(passenger =>
+                    passenger.route === fare.route
+                ).length;
+
+            const revenue =
+                passengerCount * Number(fare.amount);
+
+            labels.push(fare.route);
+            revenueData.push(revenue);
+
+            totalRevenue += revenue;
+
+        });
+
+        document.getElementById("fareCount").textContent =
+            "₦" + totalRevenue.toLocaleString();
+
+        // ======================
+        // DRAW CHART
+        // ======================
+
+        const ctx =
+            document.getElementById("revenueChart");
+
+        new Chart(ctx, {
+
+            type: "bar",
+
+            data: {
+
+                labels: labels,
+
+                datasets: [{
+
+                    label: "Revenue (₦)",
+
+                    data: revenueData,
+
+                    backgroundColor: "#16a34a",
+
+                    borderColor: "#15803d",
+
+                    borderWidth: 1,
+
+                    borderRadius: 8
+
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                plugins: {
+
+                    legend: {
+                        display: true
+                    }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    </script>
+</body>
+
+</html>

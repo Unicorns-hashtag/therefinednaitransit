@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fares | Nai's Transit</title>
+    <link rel="stylesheet" href="/assets/css/sidebar.css">
+    <link rel="stylesheet" href="/assets/css/routes.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"> -->
+</head>
+
+<body>
+    <!-- SIDEBAR  -->
+    <button id="menuBtn">≡</button>
+    <div class="overlay"></div>
+    <div class="sidebar">
+        <h2>Nai's Transit</h2>
+        <ul>
+            <li><a href="/admin/dashboard.html">Dashboard</a></li>
+            <li><a href="/admin/routes.html">Routes</a></li>
+            <li class="active"><a href="/admin/fares.html">Fares</a></li>
+            <li><a href="/admin/vehicles.html">Vehicles</a></li>
+            <li><a href="/admin/passenger.html">Passengers</a></li>
+            <li><a href="/admin/report.html">Reports</a></li>
+            <li><a href="/admin/settings.html">Settings</a></li>
+        </ul>
+        <a href="/admin/login.html" class="logout">Logout</a>
+    </div>
+    <!-- MAIN CONTENT  -->
+    <div class="main">
+        <div class="topbar">
+            <h2>Fare Management</h2>
+        </div>
+        <div class="form-box">
+            <h3>Add Fare</h3>
+            <form id="fareForm">
+                <select id="routeName">
+                </select>
+                <select id="vehicleType">
+                    <option>Vehicle Type</option>
+                    <option>Bus</option>
+                    <option>Mini Bus</option>
+                    <option>Luxury Bus</option>
+                </select>
+                <input type="number" id="fareAmount" placeholder="Fare Amount">
+                <button type="submit">Save Fare</button>
+            </form>
+        </div>
+        <div class="table-box">
+            <h3>Fare Records</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Route</th>
+                        <th>Vehicle</th>
+                        <th>Fare</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="fareTableBody">
+                    <!-- <tr>
+                        <td>1</td>
+                        <td>Ilaro - Abeokuta</td>
+                        <td>Bus</td>
+                        <td>₦2,500</td>
+                        <td>
+                            <button>Edit</button>
+                            <button>Button</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Abeokuta - Ota</td>
+                        <td>Mini Bus</td>
+                        <td>₦1,500</td>
+                        <td>
+                            <button>Edit</button>
+                            <button>Delete</button>
+                        </td>
+                    </tr> -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="/assets/javascript/activity.js"></script>
+    <script>
+        let fares = JSON.parse(localStorage.getItem("fares")) || [];
+        const fareForm = document.getElementById("fareForm");
+        const fareTableBody = document.getElementById("fareTableBody");
+        const routeSelect = document.getElementById("routeName");
+
+        const routes = JSON.parse(localStorage.getItem("routes")) || [];
+        console.log(routes);
+
+        routeSelect.innerHTML = "<option>Select Route</option>";
+
+        routes.forEach(route => {
+            routeSelect.innerHTML += `
+                <option value="${route.departure} - ${route.destination}">
+                    ${route.departure} - ${route.destination}
+                </option>
+            `;
+
+        });
+        function displayFares() {
+            fareTableBody.innerHTML = "";
+            fares.forEach((fare, index) => {
+                fareTableBody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${fare.route}</td>
+                        <td>${fare.vehicle}</td>
+                        <td>${fare.amount}</td>
+                        <td>
+                            <button onclick="deleteFare(${index})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        fareForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const route = document.getElementById("routeName").value;
+            const vehicle = document.getElementById("vehicleType").value;
+            const amount = document.getElementById("fareAmount").value;
+            if (
+                route === "Select Route" ||
+                vehicle === "Vehicle Type" ||
+                amount === ""
+            ) {
+                alert("Fill all fields");
+                return;
+            }
+            fares.push({
+                route: route,
+                vehicle: vehicle,
+                amount: amount,
+                date: new Date().toLocaleDateString("en-GB")
+            });
+            localStorage.setItem(
+                "routes",
+                JSON.stringify(routes)
+            );
+
+            addActivity("New route added: " + departure + " - " + destination);
+            fareForm.reset();
+            displayFares();
+        });
+        function deleteFare(index) {
+            fares.splice(index, 1);
+            localStorage.setItem(
+                "fares",
+                JSON.stringify(fares)
+            );
+            displayFares();
+        }
+        displayFares();
+    </script>
+    <script>
+        const menuBtn = document.getElementById("menuBtn");
+        const sidebar = document.querySelector(".sidebar");
+        const overlay = document.querySelector(".overlay");
+
+        menuBtn.addEventListener("click", () => {
+
+            sidebar.classList.toggle("show");
+            overlay.classList.toggle("show");
+
+            if (sidebar.classList.contains("show")) {
+                menuBtn.style.opacity = "0";
+            } else {
+                menuBtn.style.opacity = "1";
+            }
+
+        });
+
+        overlay.addEventListener("click", () => {
+
+            sidebar.classList.remove("show");
+            overlay.classList.remove("show");
+            menuBtn.style.opacity = "1";
+
+        });
+
+        document.querySelectorAll(".sidebar a").forEach(link => {
+
+            link.addEventListener("click", () => {
+
+                sidebar.classList.remove("show");
+                overlay.classList.remove("show");
+                menuBtn.style.opacity = "1";
+
+            });
+
+        });
+    </script>
+</body>
+
+</html>

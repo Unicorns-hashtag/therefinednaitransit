@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Nai's Transit</title>
+    <link rel="stylesheet" href="/assets/css/routes.css">
+    <link rel="stylesheet" href="/assets/css/sidebar.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+</head>
+
+<body>
+    <!-- SIDEBAR  -->
+    <button id="menuBtn">≡</button>
+    <div class="overlay"></div>
+    <div class="sidebar">
+        <h2>Nai's Transit</h2>
+        <ul>
+            <li><a href="/admin/dashboard.html">Dashboard</a></li>
+            <li><a href="/admin/routes.html">Routes</a></li>
+            <li><a href="/admin/fares.html">Fares</a></li>
+            <li><a href="/admin/vehicles.html">Vehicles</a></li>
+            <li><a href="/admin/passenger.html">Passengers</a></li>
+            <li><a href="/admin/report.html">Reports</a></li>
+            <li class="active"><a href="/admin/settings.html">Settings</a></li>
+        </ul>
+        <a href="/admin/login.html" class="logout">Logout</a>
+    </div>
+    <!-- MAIN CONTENT  -->
+    <div class="main">
+        <div class="topbar">
+            <h2>Settings</h2>
+        </div>
+        <div class="form-box">
+            <h3>Administrator Profile</h3>
+            <form id="profileForm">
+
+                <input type="text" id="fullName" placeholder="Full Name">
+
+                <input type="email" id="email" placeholder="Email Address">
+
+                <input type="text" id="systemName" placeholder="System Name">
+
+                <button type="submit">
+                    Update Profile
+                </button>
+
+            </form>
+        </div>
+        <div class="form-box">
+            <h3>Change Password</h3>
+            <form id="passwordForm">
+                <input type="password" id="currentPassword" placeholder="Current Password">
+                <input type="password" id="newPassword" placeholder="New Password">
+                <input type="password" id="confirmPassword" placeholder="Confirm New Password">
+                <button type="submit">Change Password</button>
+            </form>
+        </div>
+        <div class="form-box">
+            <h3>System Information</h3>
+            <p><strong>Project:</strong> Nai's Transit</p>
+            <p><strong>Version:</strong> 1.0</p>
+            <p><strong>Location:</strong> Ogun State, Nigeria</p>
+            <p><strong>Status:</strong> Active</p>
+        </div>
+        <button class="backup-btn" id="backupBtn">
+            Backup System Data
+        </button>
+    </div>
+    <script src="/assets/javascript/activity.js"></script>
+    <script>
+        const menuBtn = document.getElementById("menuBtn");
+        const sidebar = document.querySelector(".sidebar");
+        const overlay = document.querySelector(".overlay");
+
+        menuBtn.addEventListener("click", () => {
+
+            sidebar.classList.toggle("show");
+            overlay.classList.toggle("show");
+
+            if (sidebar.classList.contains("show")) {
+                menuBtn.style.opacity = "0";
+            } else {
+                menuBtn.style.opacity = "1";
+            }
+
+        });
+
+        overlay.addEventListener("click", () => {
+
+            sidebar.classList.remove("show");
+            overlay.classList.remove("show");
+            menuBtn.style.opacity = "1";
+
+        });
+
+        document.querySelectorAll(".sidebar a").forEach(link => {
+
+            link.addEventListener("click", () => {
+
+                sidebar.classList.remove("show");
+                overlay.classList.remove("show");
+                menuBtn.style.opacity = "1";
+
+            });
+
+        });
+    </script>
+    <script>
+        const profileForm =
+            document.getElementById("profileForm");
+
+        let user =
+            JSON.parse(localStorage.getItem("user"));
+
+        if (!user) {
+
+            user = {
+
+                fullName: "Admin User",
+
+                email: "stephennaomi254@gmail.com",
+
+                password: "#iknowme",
+
+                systemName: "Nai's Transit"
+
+            };
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(user)
+            );
+
+        }
+
+        document.getElementById("fullName").value =
+            user.fullName;
+
+        document.getElementById("email").value =
+            user.email;
+
+        document.getElementById("systemName").value =
+            user.systemName || "Nai's Transit";
+
+        profileForm.addEventListener("submit", function (e) {
+
+            e.preventDefault();
+
+            user.fullName =
+                document.getElementById("fullName").value;
+
+            user.email =
+                document.getElementById("email").value;
+
+            user.systemName =
+                document.getElementById("systemName").value;
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(user)
+            );
+            addActivity("Administrator profile updated");
+            alert("Profile Updated Successfully!");
+
+        });
+
+        const passwordForm =
+            document.getElementById("passwordForm");
+
+        passwordForm.addEventListener("submit", function (e) {
+
+            e.preventDefault();
+
+            const currentPassword =
+                document.getElementById("currentPassword").value;
+
+            const newPassword =
+                document.getElementById("newPassword").value;
+
+            const confirmPassword =
+                document.getElementById("confirmPassword").value;
+
+            let user =
+                JSON.parse(localStorage.getItem("user"));
+            if (currentPassword !== user.password) {
+                alert("Current password is incorrect");
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert("New passwords do not match");
+                return;
+            }
+
+            user.password = newPassword;
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(user)
+            );
+            addActivity("Administrator changed password");
+            alert("Password Changed Successfully");
+
+            passwordForm.reset();
+
+        }); 
+    </script>
+    <script>
+        const backupBtn = document.getElementById("backupBtn");
+
+        backupBtn.addEventListener("click", function () {
+
+            const backupData = {
+                routes: JSON.parse(localStorage.getItem("routes")) || [],
+                fares: JSON.parse(localStorage.getItem("fares")) || [],
+                vehicles: JSON.parse(localStorage.getItem("vehicles")) || [],
+                passengers: JSON.parse(localStorage.getItem("passengers")) || [],
+                reports: JSON.parse(localStorage.getItem("reports")) || [],
+                user: JSON.parse(localStorage.getItem("user")) || {},
+                passenger: JSON.parse(localStorage.getItem("passenger")) || {}
+            };
+
+            const data =
+                JSON.stringify(backupData, null, 4);
+
+            const blob = new Blob(
+                [data],
+                {
+                    type: "application/json"
+                }
+            );
+
+            const url =
+                URL.createObjectURL(blob);
+
+            const link =
+                document.createElement("a");
+
+            const today =
+                new Date();
+
+            const filename =
+                `nai-transit-backup-${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`;
+
+            link.href = url;
+
+            link.download = filename;
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
+
+            URL.revokeObjectURL(url);
+            addActivity("System backup downloaded");
+            alert("Backup downloaded successfully!");
+
+        });
+    </script>
+</body>
+
+</html>

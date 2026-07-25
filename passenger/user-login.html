@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Login</title>
+    <link rel="stylesheet" href="/assets/css/user-login.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="left-section">
+            <div class="content">
+                <h1>Passenger Portal</h1>
+                <p>
+                    Access your profile and check transport fares.
+                </p>
+                <img src="/images/download.jpeg" alt="bus">
+            </div>
+        </div>
+
+        <div class="right-section">
+
+            <div class="login-box">
+
+                <h2>Passenger Login</h2>
+
+                <form id="userLoginForm">
+
+                    <div class="input-group">
+                        <label>Username</label>
+                        <input type="text" id="username" placeholder="Enter Username">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="password" placeholder="Enter Password">
+                    </div>
+
+                    <button type="submit">
+                        Login
+                    </button>
+
+                </form>
+
+                <div class="links">
+                    <a href="/passenger/user-register.html">
+                        Create Account
+                    </a>
+                </div>
+
+                <a class="home-link" href="/admin/index.html">
+                    Back to Home
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const userLoginForm =
+            document.getElementById("userLoginForm");
+
+        userLoginForm.addEventListener("submit", function (e) {
+
+            e.preventDefault();
+
+            const username =
+                document.getElementById("username").value.trim();
+
+            const password =
+                document.getElementById("password").value.trim();
+
+            const storedUser =
+                JSON.parse(localStorage.getItem("passenger"));
+
+            if (!storedUser) {
+
+                alert("No passenger account found. Please register first.");
+                return;
+
+            }
+
+            if (
+                username === storedUser.username &&
+                password === storedUser.password
+            ) {
+
+                alert("Login Successful!");
+
+                window.location.href =
+                    "user-dashboard.html";
+
+            }
+            else {
+
+                alert("Incorrect username or password.");
+
+            }
+
+        });
+
+    </script>
+
+
+</body>
+
+</html>

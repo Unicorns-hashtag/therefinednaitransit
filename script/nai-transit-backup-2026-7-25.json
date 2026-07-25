@@ -1,0 +1,86 @@
+{
+    "routes": [
+        {
+            "name": "Ilaro Express",
+            "departure": "Ilaro",
+            "destination": "Abeokuta"
+        },
+        {
+            "name": "lagos-ikeja",
+            "departure": "lagos",
+            "destination": "ikorodu"
+        },
+        {
+            "name": "ijanna",
+            "departure": "Poly",
+            "destination": "redeemers college"
+        },
+        {
+            "name": "Lagos-Abeokuta",
+            "departure": "Agege",
+            "destination": "Redemption-City"
+        }
+    ],
+    "fares": [
+        {
+            "route": "Ilaro - Abeokuta",
+            "vehicle": "Luxury Bus",
+            "amount": "3500"
+        },
+        {
+            "route": "lagos - ikorodu",
+            "vehicle": "Bus",
+            "amount": "2200"
+        },
+        {
+            "route": "Poly - redeemers college",
+            "vehicle": "Mini Bus",
+            "amount": "700"
+        },
+        {
+            "route": "Agege - Redemption-City",
+            "vehicle": "Luxury Bus",
+            "amount": "7000"
+        }
+    ],
+    "vehicles": [
+        {
+            "number": "OGN-225-E0",
+            "type": "Mini Bus",
+            "capacity": "10",
+            "driver": "hanson",
+            "status": "Maintenance"
+        },
+        {
+            "number": "OFN-223-WE",
+            "type": "Luxery Bus",
+            "capacity": "50",
+            "driver": "Jeremy",
+            "status": "Active"
+        }
+    ],
+    "passengers": [
+        {
+            "name": "Naovelle",
+            "phone": "08087200106",
+            "route": "Agege - Redemption-City",
+            "vehicle": "OFN-223-WE"
+        }
+    ],
+    "reports": [],
+    "user": {
+        "fullName": "Naomi Stephen",
+        "email": "littlenaomi75@gmail.com",
+        "phone": "09071774367",
+        "username": "RichBitch",
+        "password": "iwonttellyou",
+        "systemName": "Nai's Transit"
+    },
+    "passenger": {
+        "fullName": "Ruth Stephen",
+        "email": "stephnai08@gmail.com",
+        "phone": "08087200106",
+        "username": "Naovelle",
+        "password": "honeybunny5678"
+    }
+}

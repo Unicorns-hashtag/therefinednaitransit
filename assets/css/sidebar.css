@@ -1,0 +1,137 @@
+/* SIDEBAR  */
+.sidebar{
+    width: 220px;
+    background-color: #0f3d2e;
+    color: white;
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+}
+.sidebar a{
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+.sidebar h2{
+    margin-bottom: 30px;
+    /* margin-left: 60px; */
+}
+.sidebar ul{
+    list-style: none;
+}
+.sidebar ul li{
+    padding: 12px 0;
+    cursor: pointer;
+    opacity: 0.8;
+}
+.sidebar ul li:hover{
+    opacity: 1;
+}
+/* ACTIVE MENU  */
+.sidebar ul li.active{
+    background-color: rgba(255, 255, 255, 0.1);
+    padding-left: 10px;
+    border-radius: 6px;
+}
+/* LOGOUT  */
+.logout{
+    /* position: absolute; */
+    /* bottom: 20px; */
+    /* left: 20px; */
+    /* right: 20px; */
+    margin-top: 20px;
+    width: 100%;
+    display: block;
+    text-align: center;
+    padding: 12px;
+    background-color: #d9534f;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+}
+.logout:hover{
+    background-color: #c9302c;
+}
+
+#menuBtn{
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    padding: 10px 15px;
+    font-size: 20px;
+    border-radius: 5px;
+    border: none;
+    background-color: #0f3d2e;
+    color: white;
+    cursor: pointer;
+    z-index: 3000;
+}
+
+#overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+    z-index: 999;
+}
+
+#overlay.active{
+    opacity: 1;
+    visibility: visible;
+}
+
+
+@media (max-width: 768px) {
+    .sidebar{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 260px;
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.35s ease;
+    }
+
+    .sidebar.show{
+        transform: translateX(0);
+    }
+    .sidebar h2{
+        margin-left: 50px;
+    }
+
+    #menuBtn{
+        display: block;
+        z-index: 1200;
+        transition: 0.3s;
+    } 
+    .sidebar.show ~ #menuBtn{
+        opacity: 0;
+    }
+
+    .sidebar.show + .main{
+        pointer-events: none;
+    }
+    .main{
+        margin-left: 0 !important;
+        width: 100%;
+    }
+    .logout{
+        position: static;
+        width: 100%;
+        margin-top: 20px;
+    }
+    /* #menuBtn{
+        display: block;
+        position: fixed;
+        
+    } */
+}

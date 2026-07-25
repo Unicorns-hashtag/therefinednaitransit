@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger | Nai's Transit</title>
+    <link rel="stylesheet" href="/assets/css/routes.css">
+    <link rel="stylesheet" href="/assets/css/sidebar.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+</head>
+
+<body>
+    <!-- SIDEBAR  -->
+    <button id="menuBtn">≡</button>
+    <div class="overlay"></div>
+    <div class="sidebar">
+        <h2>Nai's Transit</h2>
+        <ul>
+            <li><a href="/admin/dashboard.html">Dashboard</a></li>
+            <li><a href="/admin/routes.html">Routes</a></li>
+            <li><a href="/admin/fares.html">Fares</a></li>
+            <li><a href="/admin/vehicles.html">Vehicles</a></li>
+            <li class="active"><a href="/admin/passenger.html">Passengers</a></li>
+            <li><a href="/admin/report.html">Reports</a></li>
+            <li><a href="/admin/settings.html">Settings</a></li>
+        </ul>
+        <a href="/admin/login.html" class="logout">Logout</a>
+    </div>
+    <!-- MAIN CONTENT  -->
+    <div class="main">
+        <div class="topbar">
+            <h2>Passenger Management</h2>
+        </div>
+        <!-- ADD PASSENGER FORM  -->
+        <div class="form-box">
+            <h3>Add Passenger</h3>
+            <form id="passengerForm">
+                <input type="text" id="passengerName" placeholder="Passenger Name">
+                <input type="tel" id="phoneNumber" placeholder="Phone Number">
+                <select id="route">
+                </select>
+                <select id="vehicle">
+                </select>
+                <button type="submit">Add Passenger</button>
+            </form>
+        </div>
+        <!-- PASSENGER RECORDS TABLE  -->
+        <div class="table-box">
+            <h3>Passenger Records</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Passenger Name</th>
+                        <th>Phone Number</th>
+                        <th>Route</th>
+                        <th>Vehicle No</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="passengerTableBody">
+                    <tr>
+                        <td>1</td>
+                        <td>Aisha Bello</td>
+                        <td>08012345678</td>
+                        <td>Ilaro - Abeokuta</td>
+                        <td>OGN-101</td>
+                        <td class="status-boarded">Boarded</td>
+                        <td>
+                            <button>Edit</button>
+                            <button>Button</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Samuel Adeyemi</td>
+                        <td>08198765432</td>
+                        <td>Abeokuta - Ota</td>
+                        <td>OGN-202</td>
+                        <td class="status-waiting">Waiting</td>
+                        <td>
+                            <button>Edit</button>
+                            <button>Button</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Mary Salako</td>
+                        <td>07011223344</td>
+                        <td>Sagamu - Ijebu Ode</td>
+                        <td>OGN-303</td>
+                        <td class="status-boarded">Boarded</td>
+                        <td>
+                            <button>Edit</button>
+                            <button>Button</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="/assets/javascript/activity.js"></script>
+    <script>
+        let passengers = JSON.parse(localStorage.getItem("passengers")) || [];
+        const form = document.getElementById("passengerForm");
+        const tableBody = document.getElementById("passengerTableBody");
+        const routeSelect = document.getElementById("route");
+        const vehicleSelect = document.getElementById("vehicle");
+
+        // Load Routes
+        const routes = JSON.parse(localStorage.getItem("routes")) || [];
+
+        routeSelect.innerHTML = `<option value="">Select Route</option>`;
+
+        routes.forEach(route => {
+
+            routeSelect.innerHTML += `
+        <option value="${route.departure} - ${route.destination}">
+            ${route.departure} - ${route.destination}
+        </option>
+    `;
+
+        });
+
+        // Load Vehicles
+        const vehicles = JSON.parse(localStorage.getItem("vehicles")) || [];
+
+        vehicleSelect.innerHTML = `<option value="">Select Vehicle</option>`;
+
+        vehicles.forEach(vehicle => {
+
+            vehicleSelect.innerHTML += `
+        <option value="${vehicle.number}">
+            ${vehicle.number}
+        </option>
+    `;
+
+        });
+        function displayPassengers() {
+            tableBody.innerHTML = "";
+            passengers.forEach((passenger, index) => {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${passenger.name}</td>
+                        <td>${passenger.phone}</td>
+                        <td>${passenger.route}</td>
+                        <td>${passenger.vehicle}</td>
+                        <td>
+                            <span class="status-boarded">Boarded</span>    
+                        </td>
+                        <td>
+                            <button onclick="deletePassenger(${index})">Delete</button>    
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const name = document.getElementById("passengerName").value;
+            const phone = document.getElementById("phoneNumber").value;
+            const route = document.getElementById("route").value;
+            const vehicle = document.getElementById("vehicle").value;
+
+            if (
+                name === "" ||
+                phone === "" ||
+                route === "" ||
+                vehicle === ""
+            ) {
+                alert("Please fill all fields");
+                return;
+            }
+            passengers.push({
+                name: name,
+                phone: phone,
+                route: route,
+                vehicle: vehicle
+            });
+            localStorage.setItem(
+                "passengers",
+                JSON.stringify(passengers)
+            );
+            addActivity("New passenger registered: " + name);
+            form.reset();
+            displayPassengers();
+        });
+        window.deletePassenger = function (index) {
+            if (confirm("Delete this passenger?")) {
+                passengers.splice(index, 1);
+                localStorage.setItem(
+                    "passengers",
+                    JSON.stringify(passengers)
+                );
+                addActivity("Passenger deleted");
+                displayPassengers();
+            }
+        }
+        displayPassengers()
+    </script>
+    <script>
+        const menuBtn = document.getElementById("menuBtn");
+        const sidebar = document.querySelector(".sidebar");
+        const overlay = document.querySelector(".overlay");
+
+        menuBtn.addEventListener("click", () => {
+
+            sidebar.classList.toggle("show");
+            overlay.classList.toggle("show");
+
+            if (sidebar.classList.contains("show")) {
+                menuBtn.style.opacity = "0";
+            } else {
+                menuBtn.style.opacity = "1";
+            }
+
+        });
+
+        overlay.addEventListener("click", () => {
+
+            sidebar.classList.remove("show");
+            overlay.classList.remove("show");
+            menuBtn.style.opacity = "1";
+
+        });
+
+        document.querySelectorAll(".sidebar a").forEach(link => {
+
+            link.addEventListener("click", () => {
+
+                sidebar.classList.remove("show");
+                overlay.classList.remove("show");
+                menuBtn.style.opacity = "1";
+
+            });
+
+        });
+    </script>
+</body>
+
+</html>

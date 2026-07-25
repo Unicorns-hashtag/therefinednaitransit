@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routes | Nai's Transit</title>
+    <link rel="stylesheet" href="/assets/css/routes.css">
+    <link rel="stylesheet" href="/assets/css/sidebar.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"> -->
+</head>
+
+<body>
+    <!-- SIDEBAR -->
+    <button id="menuBtn">≡</button>
+    <div class="overlay"></div>
+    <div class="sidebar">
+        <h2>Nai's Transit</h2>
+        <ul>
+            <li><a href="/admin/dashboard.html">Dashboard</a></li>
+            <li class="active"><a href="/admin/routes.html">Routes</a></li>
+            <li><a href="/admin/fares.html">Fares</a></li>
+            <li><a href="/admin/vehicles.html">Vehicles</a></li>
+            <li><a href="/admin/passenger.html">Passengers</a></li>
+            <li><a href="/admin/report.html">Reports</a></li>
+            <li><a href="/admin/settings.html">Settings</a></li>
+        </ul>
+        <a href="/admin/login.html" class="logout">Logout</a>
+    </div>
+    <!-- MAIN  -->
+    <div class="main">
+        <div class="topbar">
+            <h2>Route Management</h2>
+        </div>
+        <!-- ADD ROUTE FORM  -->
+        <div class="form-box">
+            <h3>Add New Route</h3>
+            <form id="routeForm">
+                <input type="text" id="routeName" placeholder="Route Name">
+                <input type="text" id="departure" placeholder="Departure">
+                <input type="text" id="destination" placeholder="Destination">
+                <button type="submit">Add Route</button>
+            </form>
+        </div>
+        <!-- ROUTE TABLE  -->
+        <div class="table-box">
+            <h3>Available Routes</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Route</th>
+                        <th>Departure</th>
+                        <th>Destination</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="routeTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="/assets/javascript/activity.js"></script>
+    <script>
+        let routes = JSON.parse(localStorage.getItem("routes")) || [];
+        const form = document.getElementById("routeForm");
+        const tableBody = document.getElementById("routeTableBody");
+        function displayRoutes() {
+            tableBody.innerHTML = "";
+            routes.forEach((route, index) => {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${route.name}</td>
+                        <td>${route.departure}</td>
+                        <td>${route.destination}</td>
+                        <td>
+                            <button onclick="deleteRoute(${index})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const routeName = document.getElementById("routeName").value;
+            const departure = document.getElementById("departure").value;
+            const destination = document.getElementById("destination").value;
+            if (
+                routeName === "" ||
+                departure === "" ||
+                destination === ""
+            ) {
+                alert("Please fill all fields");
+                return;
+            }
+            routes.push({
+                name: routeName,
+                departure: departure,
+                destination: destination
+            });
+            localStorage.setItem(
+                "routes",
+                JSON.stringify(routes)
+            );
+            addActivity("New route added: " + departure + " - " + destination);
+            form.reset();
+            displayRoutes();
+
+        });
+        function deleteRoute(index) {
+            if (confirm("Delete this route")) {
+                routes.splice(index, 1);
+                localStorage.setItem(
+                    "routes",
+                    JSON.stringify(routes)
+                );
+                addActivity("Route deleted");
+                displayRoutes();
+            }
+        }
+        displayRoutes();
+    </script>
+    <script>
+        const menuBtn = document.getElementById("menuBtn");
+        const sidebar = document.querySelector(".sidebar");
+        const overlay = document.querySelector(".overlay");
+
+        menuBtn.addEventListener("click", () => {
+
+            sidebar.classList.toggle("show");
+            overlay.classList.toggle("show");
+
+            if (sidebar.classList.contains("show")) {
+                menuBtn.style.opacity = "0";
+            } else {
+                menuBtn.style.opacity = "1";
+            }
+
+        });
+
+        overlay.addEventListener("click", () => {
+
+            sidebar.classList.remove("show");
+            overlay.classList.remove("show");
+            menuBtn.style.opacity = "1";
+
+        });
+
+        document.querySelectorAll(".sidebar a").forEach(link => {
+
+            link.addEventListener("click", () => {
+
+                sidebar.classList.remove("show");
+                overlay.classList.remove("show");
+                menuBtn.style.opacity = "1";
+
+            });
+
+        });
+    </script>
+
+</body>
+
+</html>

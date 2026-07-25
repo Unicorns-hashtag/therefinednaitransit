@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/assets/css/login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+</head>
+
+<body>
+    <div class="container">
+        <!-- LEFT SECTION  -->
+        <div class="left-section">
+            <div class="content">
+                <h1>Welcome Back</h1>
+                <p>
+                    Manage transport routes, fares, passengers and reports from a single platform.
+                </p>
+                <img src="/images/download (1).jpeg" alt="bus">
+            </div>
+        </div>
+
+        <!-- RIGHT SECTION  -->
+        <div class="right-section">
+            <div class="login-box">
+                <h2>Login</h2>
+                <form id="loginForm">
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" placeholder="Enter your email">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="password" placeholder="Enter your password">
+                    </div>
+                    <div class="remember">
+                        <input type="checkbox">
+                        <span>Remember Me</span>
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                <div class="links"><a href="#">Forgot Password?</a></div>
+                <a href="/admin/index.html">Back to Home</a>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        const loginForm = document.getElementById("loginForm");
+
+        loginForm.addEventListener("submit", function (e) {
+
+            e.preventDefault();
+
+            const email = document.getElementById("email").value.trim();
+
+            const password = document.getElementById("password").value.trim();
+
+            const user = JSON.parse(localStorage.getItem("user"));
+
+            if (!user) {
+
+                alert("No admin account found.");
+                return;
+
+            }
+
+            if (
+
+                email === user.email &&
+                password === user.password
+
+            ) {
+
+                alert("Login Successful!");
+
+                localStorage.setItem("loggedIn", "true");
+
+                window.location.href = "dashboard.html";
+
+            } else {
+
+                alert("Invalid Admin Credentials");
+
+            }
+
+        });
+
+    </script>
+</body>
+
+</html>

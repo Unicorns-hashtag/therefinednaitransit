@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Nai's Transit</title>
+    <link rel="stylesheet" href="/assets/css/profile.css">
+</head>
+
+<body>
+    <div class="profile-container">
+
+        <h2>My Profile</h2>
+
+        <form id="profileForm">
+
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" id="fullName">
+            </div>
+
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="email">
+            </div>
+
+            <div class="input-group">
+                <label>Phone Number</label>
+                <input type="tel" id="phone">
+            </div>
+
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" id="username">
+            </div>
+
+            <h3>Change Password</h3> <br>
+
+            <div class="input-group">
+                <label>Current Password</label>
+                <input type="password" id="currentPassword">
+            </div>
+
+            <div class="input-group">
+                <label>New Password</label>
+                <input type="password" id="newPassword">
+            </div>
+
+            <div class="input-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="confirmPassword">
+            </div>
+
+            <button type="submit">
+                Save Changes
+            </button>
+
+        </form>
+
+        <a href="/passenger/user-dashboard.html" class="back-btn">
+            Back to Dashboard
+        </a>
+
+    </div>
+    <script>
+
+        const passenger =
+            JSON.parse(localStorage.getItem("passenger"));
+
+        if (passenger) {
+
+            document.getElementById("fullName").value =
+                passenger.fullName;
+
+            document.getElementById("email").value =
+                passenger.email;
+
+            document.getElementById("phone").value =
+                passenger.phone;
+
+            document.getElementById("username").value =
+                passenger.username;
+
+        }
+
+        document.getElementById("profileForm")
+            .addEventListener("submit", function (e) {
+
+                e.preventDefault();
+
+                let password = passenger.password;
+
+                const currentPassword =
+                    document.getElementById("currentPassword").value;
+
+                const newPassword =
+                    document.getElementById("newPassword").value;
+
+                const confirmPassword =
+                    document.getElementById("confirmPassword").value;
+
+                // User wants to change password
+                if (
+                    currentPassword !== "" ||
+                    newPassword !== "" ||
+                    confirmPassword !== ""
+                ) {
+
+                    if (currentPassword !== passenger.password) {
+
+                        alert("Current password is incorrect.");
+                        return;
+
+                    }
+
+                    if (newPassword !== confirmPassword) {
+
+                        alert("New passwords do not match.");
+                        return;
+
+                    }
+
+                    password = newPassword;
+
+                }
+
+                const updatedPassenger = {
+
+                    fullName:
+                        document.getElementById("fullName").value,
+
+                    email:
+                        document.getElementById("email").value,
+
+                    phone:
+                        document.getElementById("phone").value,
+
+                    username:
+                        document.getElementById("username").value,
+
+                    password: password
+
+                };
+
+                localStorage.setItem(
+                    "passenger",
+                    JSON.stringify(updatedPassenger)
+                );
+
+                alert("Profile Updated Successfully!");
+
+                window.location.href =
+                    "/passenger/user-dashboard.html";
+
+            });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report | Nai's Transit</title>
+    <link rel="stylesheet" href="/assets/css/routes.css">
+    <link rel="stylesheet" href="/assets/css/sidebar.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+</head>
+
+<body>
+    <!-- SIDEBAR  -->
+    <button id="menuBtn">≡</button>
+    <div class="overlay"></div>
+    <div class="sidebar">
+        <h2>Nai's Transit</h2>
+        <ul>
+            <li><a href="/admin/dashboard.html">Dashboard</a></li>
+            <li><a href="/admin/routes.html">Routes</a></li>
+            <li><a href="/admin/fares.html">Fares</a></li>
+            <li><a href="/admin/vehicles.html">Vehicles</a></li>
+            <li><a href="/admin/passenger.html">Passengers</a></li>
+            <li class="active"><a href="/admin/report.html">Reports</a></li>
+            <li><a href="/admin/settings.html">Settings</a></li>
+        </ul>
+        <a href="/admin/login.html" class="logout">Logout</a>
+    </div>
+    <!-- MAIN CONTENT  -->
+    <div class="main">
+        <div class="topbar">
+            <h2>Reports & Analytics</h2>
+        </div>
+        <!-- SUMMARY CARDS  -->
+        <div class="card">
+            <h4>Total Routes</h4>
+            <p id="totalRoutes">0</p>
+        </div>
+
+        <div class="card">
+            <h4>Total Vehicles</h4>
+            <p id="totalVehicles">0</p>
+        </div>
+
+        <div class="card">
+            <h4>Total Passengers</h4>
+            <p id="totalPassengers">0</p>
+        </div>
+
+        <div class="card">
+            <h4>Total Revenue</h4>
+            <p id="totalRevenue">₦0</p>
+        </div>
+        <!-- REPORT TABLE  -->
+        <div class="table-box">
+            <h3>Transport Reports</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Route</th>
+                        <th>Passengers</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="/assets/javascript/activity.js"></script>
+    <script>
+        const routes = JSON.parse(localStorage.getItem("routes")) || [];
+        const vehicles = JSON.parse(localStorage.getItem("vehicles")) || [];
+        const passengers = JSON.parse(localStorage.getItem("passengers")) || [];
+        const fares = JSON.parse(localStorage.getItem("fares")) || [];
+
+        document.getElementById("totalRoutes").textContent = routes.length;
+        document.getElementById("totalVehicles").textContent = vehicles.length;
+        document.getElementById("totalPassengers").textContent = passengers.length;
+
+        let revenue = 0;
+
+        fares.forEach(fare => {
+            revenue += Number(fare.amount);
+        });
+
+        document.getElementById("totalRevenue").textContent =
+            "₦" + revenue.toLocaleString();
+
+        const reportTableBody = document.getElementById("reportTableBody");
+
+        reportTableBody.innerHTML = "";
+
+        fares.forEach((fare, index) => {
+
+            reportTableBody.innerHTML += `
+                <tr>
+                    <td>${fare.date}</td>
+                    <td>${fare.route}</td>
+                    <td>${passengers.filter(p => p.route === fare.route).length}</td>
+                    <td>₦${Number(fare.amount).toLocaleString()}</td>
+                </tr>
+            `;
+
+        });
+    </script>
+    <script>
+        const menuBtn = document.getElementById("menuBtn");
+        const sidebar = document.querySelector(".sidebar");
+        const overlay = document.querySelector(".overlay");
+
+        menuBtn.addEventListener("click", () => {
+
+            sidebar.classList.toggle("show");
+            overlay.classList.toggle("show");
+
+            if (sidebar.classList.contains("show")) {
+                menuBtn.style.opacity = "0";
+            } else {
+                menuBtn.style.opacity = "1";
+            }
+
+        });
+
+        overlay.addEventListener("click", () => {
+
+            sidebar.classList.remove("show");
+            overlay.classList.remove("show");
+            menuBtn.style.opacity = "1";
+
+        });
+
+        document.querySelectorAll(".sidebar a").forEach(link => {
+
+            link.addEventListener("click", () => {
+
+                sidebar.classList.remove("show");
+                overlay.classList.remove("show");
+                menuBtn.style.opacity = "1";
+
+            });
+
+        });
+    </script>
+</body>
+
+</html>
