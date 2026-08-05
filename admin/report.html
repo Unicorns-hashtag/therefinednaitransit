@@ -74,40 +74,193 @@
     </div>
     <script src="/assets/javascript/activity.js"></script>
     <script>
-        const routes = JSON.parse(localStorage.getItem("routes")) || [];
-        const vehicles = JSON.parse(localStorage.getItem("vehicles")) || [];
-        const passengers = JSON.parse(localStorage.getItem("passengers")) || [];
-        const fares = JSON.parse(localStorage.getItem("fares")) || [];
 
-        document.getElementById("totalRoutes").textContent = routes.length;
-        document.getElementById("totalVehicles").textContent = vehicles.length;
-        document.getElementById("totalPassengers").textContent = passengers.length;
+        // ==========================================
+        // LOAD DATA
+        // ==========================================
+
+        const routes =
+            JSON.parse(localStorage.getItem("routes")) || [];
+
+        const vehicles =
+            JSON.parse(localStorage.getItem("vehicles")) || [];
+
+        const passengers =
+            JSON.parse(localStorage.getItem("passengers")) || [];
+
+        const fares =
+            JSON.parse(localStorage.getItem("fares")) || [];
+
+
+        // ==========================================
+        // SUMMARY CARDS
+        // ==========================================
+
+        document.getElementById("totalRoutes").textContent =
+            routes.length;
+
+        document.getElementById("totalVehicles").textContent =
+            vehicles.length;
+
+        document.getElementById("totalPassengers").textContent =
+            passengers.length;
+
+
+        // ==========================================
+        // TOTAL REVENUE
+        // ==========================================
 
         let revenue = 0;
 
-        fares.forEach(fare => {
-            revenue += Number(fare.amount);
+        fares.forEach(function (fare) {
+
+            revenue += Number(fare.amount) || 0;
+
         });
 
         document.getElementById("totalRevenue").textContent =
             "₦" + revenue.toLocaleString();
 
-        const reportTableBody = document.getElementById("reportTableBody");
+
+        // ==========================================
+        // REPORT TABLE
+        // ==========================================
+
+        const reportTableBody =
+            document.getElementById("reportTableBody");
+
+
+        // ==========================================
+        // CONVERT DATE TO A REAL DATE
+        // ==========================================
+
+        function getDateValue(dateString) {
+
+            if (!dateString) {
+                return 0;
+            }
+
+            // Expected format: DD/MM/YYYY
+
+            const parts = dateString.split("/");
+
+            if (parts.length !== 3) {
+                return 0;
+            }
+
+            const day = Number(parts[0]);
+            const month = Number(parts[1]) - 1;
+            const year = Number(parts[2]);
+
+            return new Date(
+                year,
+                month,
+                day
+            ).getTime();
+
+        }
+
+
+        // ==========================================
+        // SORT FARES
+        // NEWEST → OLDEST
+        // ==========================================
+
+        const sortedFares = fares
+            .map(function (fare, index) {
+
+                return {
+                    ...fare,
+                    originalIndex: index
+                };
+
+            })
+            .sort(function (a, b) {
+
+                const dateA = getDateValue(a.date);
+                const dateB = getDateValue(b.date);
+
+                // Newest dates first
+
+                if (dateA !== dateB) {
+                    return dateB - dateA;
+                }
+
+                // If dates are the same,
+                // newer stored records come first
+
+                return b.originalIndex - a.originalIndex;
+
+            });
+
+
+        // ==========================================
+        // DISPLAY REPORTS
+        // ==========================================
 
         reportTableBody.innerHTML = "";
 
-        fares.forEach((fare, index) => {
+        if (sortedFares.length === 0) {
 
-            reportTableBody.innerHTML += `
-                <tr>
-                    <td>${fare.date}</td>
-                    <td>${fare.route}</td>
-                    <td>${passengers.filter(p => p.route === fare.route).length}</td>
-                    <td>₦${Number(fare.amount).toLocaleString()}</td>
-                </tr>
-            `;
+            reportTableBody.innerHTML = `
+        <tr>
+            <td colspan="4">
+                No transport reports available.
+            </td>
+        </tr>
+    `;
 
-        });
+        } else {
+
+            sortedFares.forEach(function (fare) {
+
+                // Make route comparison case-insensitive
+
+                const fareRoute =
+                    String(fare.route || "")
+                        .trim()
+                        .toLowerCase();
+
+
+                const passengerCount =
+                    passengers.filter(function (passenger) {
+
+                        const passengerRoute =
+                            String(passenger.route || "")
+                                .trim()
+                                .toLowerCase();
+
+                        return passengerRoute === fareRoute;
+
+                    }).length;
+
+
+                // Fix old records that don't have a date
+
+                const reportDate =
+                    fare.date || "Previous record";
+
+
+                reportTableBody.innerHTML += `
+            <tr>
+
+                <td>${reportDate}</td>
+
+                <td>${fare.route || "Unknown route"}</td>
+
+                <td>${passengerCount}</td>
+
+                <td>
+                    ₦${Number(fare.amount || 0).toLocaleString()}
+                </td>
+
+            </tr>
+        `;
+
+            });
+
+        }
+
     </script>
     <script>
         const menuBtn = document.getElementById("menuBtn");
@@ -117,12 +270,12 @@
         menuBtn.addEventListener("click", () => {
 
             sidebar.classList.toggle("show");
-            overlay.classList.toggle("show");
+            overlay.classList.toggle("active");
 
             if (sidebar.classList.contains("show")) {
-                menuBtn.style.opacity = "0";
+                menuBtn.innerHTML = "✕";
             } else {
-                menuBtn.style.opacity = "1";
+                menuBtn.innerHTML = "☰";
             }
 
         });
@@ -130,8 +283,8 @@
         overlay.addEventListener("click", () => {
 
             sidebar.classList.remove("show");
-            overlay.classList.remove("show");
-            menuBtn.style.opacity = "1";
+            overlay.classList.remove("active");
+            menuBtn.innerHTML = "☰";
 
         });
 
@@ -140,8 +293,8 @@
             link.addEventListener("click", () => {
 
                 sidebar.classList.remove("show");
-                overlay.classList.remove("show");
-                menuBtn.style.opacity = "1";
+                overlay.classList.remove("active");
+                menuBtn.innerHTML = "☰";
 
             });
 

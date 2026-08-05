@@ -48,7 +48,10 @@
         </div>
         <!-- ROUTE TABLE  -->
         <div class="table-box">
-            <h3>Available Routes</h3>
+            <div class="table-header">
+                <h3>Available Routes</h3>
+                <input type="text" id="routeSearch" placeholder="🔎 Search routes...">
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -67,64 +70,175 @@
     <script src="/assets/javascript/activity.js"></script>
     <script>
         let routes = JSON.parse(localStorage.getItem("routes")) || [];
+
         const form = document.getElementById("routeForm");
         const tableBody = document.getElementById("routeTableBody");
-        function displayRoutes() {
+        const routeSearch = document.getElementById("routeSearch");
+
+
+        // =========================
+        // DISPLAY ROUTES
+        // =========================
+
+        function displayRoutes(searchText = "") {
+
             tableBody.innerHTML = "";
+
+            const search = searchText.toLowerCase().trim();
+
             routes.forEach((route, index) => {
+
+                const routeName = String(route.name || "").toLowerCase();
+                const departure = String(route.departure || "").toLowerCase();
+                const destination = String(route.destination || "").toLowerCase();
+
+                // Search route name, departure or destination
+                const matches =
+                    routeName.includes(search) ||
+                    departure.includes(search) ||
+                    destination.includes(search);
+
+                if (!matches) {
+                    return;
+                }
+
                 tableBody.innerHTML += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${route.name}</td>
-                        <td>${route.departure}</td>
-                        <td>${route.destination}</td>
-                        <td>
-                            <button onclick="deleteRoute(${index})">Delete</button>
-                        </td>
-                    </tr>
-                `;
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${route.name}</td>
+                    <td>${route.departure}</td>
+                    <td>${route.destination}</td>
+                    <td>
+                        <button onclick="deleteRoute(${index})">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `;
             });
+
+
+            // If nothing matches the search
+            if (tableBody.innerHTML === "") {
+
+                tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align:center;">
+                        No matching routes found.
+                    </td>
+                </tr>
+            `;
+            }
         }
+
+
+        // =========================
+        // ADD ROUTE
+        // =========================
+
         form.addEventListener("submit", function (e) {
+
             e.preventDefault();
 
-            const routeName = document.getElementById("routeName").value;
-            const departure = document.getElementById("departure").value;
-            const destination = document.getElementById("destination").value;
+            const routeName =
+                document.getElementById("routeName").value.trim();
+
+            const departure =
+                document.getElementById("departure").value.trim();
+
+            const destination =
+                document.getElementById("destination").value.trim();
+
+
             if (
                 routeName === "" ||
                 departure === "" ||
                 destination === ""
             ) {
+
                 alert("Please fill all fields");
                 return;
             }
+
+
             routes.push({
+
                 name: routeName,
                 departure: departure,
                 destination: destination
+
             });
+
+
             localStorage.setItem(
                 "routes",
                 JSON.stringify(routes)
             );
-            addActivity("New route added: " + departure + " - " + destination);
-            form.reset();
-            displayRoutes();
 
+
+            addActivity(
+                "New route added: " +
+                departure +
+                " - " +
+                destination
+            );
+
+
+            form.reset();
+
+            // Show updated records
+            displayRoutes(routeSearch.value);
         });
+
+
+        // =========================
+        // DELETE ROUTE
+        // =========================
+
         function deleteRoute(index) {
-            if (confirm("Delete this route")) {
+
+            if (confirm("Delete this route?")) {
+
+                const deletedRoute = routes[index];
+
                 routes.splice(index, 1);
+
                 localStorage.setItem(
                     "routes",
                     JSON.stringify(routes)
                 );
-                addActivity("Route deleted");
-                displayRoutes();
+
+
+                addActivity(
+                    "Route deleted: " +
+                    deletedRoute.departure +
+                    " - " +
+                    deletedRoute.destination
+                );
+
+
+                displayRoutes(routeSearch.value);
             }
         }
+
+
+        // =========================
+        // LIVE SEARCH
+        // =========================
+
+        routeSearch.addEventListener("input", function () {
+
+            displayRoutes(this.value);
+
+        });
+
+
+        // =========================
+        // INITIAL DISPLAY
+        // =========================
+
         displayRoutes();
+
     </script>
     <script>
         const menuBtn = document.getElementById("menuBtn");
@@ -134,12 +248,12 @@
         menuBtn.addEventListener("click", () => {
 
             sidebar.classList.toggle("show");
-            overlay.classList.toggle("show");
+            overlay.classList.toggle("active");
 
             if (sidebar.classList.contains("show")) {
-                menuBtn.style.opacity = "0";
+                menuBtn.innerHTML = "✕";
             } else {
-                menuBtn.style.opacity = "1";
+                menuBtn.innerHTML = "☰";
             }
 
         });
@@ -147,8 +261,8 @@
         overlay.addEventListener("click", () => {
 
             sidebar.classList.remove("show");
-            overlay.classList.remove("show");
-            menuBtn.style.opacity = "1";
+            overlay.classList.remove("active");
+            menuBtn.innerHTML = "☰";
 
         });
 
@@ -157,8 +271,8 @@
             link.addEventListener("click", () => {
 
                 sidebar.classList.remove("show");
-                overlay.classList.remove("show");
-                menuBtn.style.opacity = "1";
+                overlay.classList.remove("active");
+                menuBtn.innerHTML = "☰";
 
             });
 

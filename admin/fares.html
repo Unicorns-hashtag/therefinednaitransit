@@ -52,19 +52,25 @@
             </form>
         </div>
         <div class="table-box">
-            <h3>Fare Records</h3>
+            <div class="table-header">
+                <h3>Fare Records</h3>
+
+                <input type="text" id="fareSearch" placeholder="🔎 Search fares...">
+            </div>
+
             <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Route</th>
-                        <th>Vehicle</th>
-                        <th>Fare</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="fareTableBody">
-                    <!-- <tr>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Route</th>
+                            <th>Vehicle</th>
+                            <th>Fare</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fareTableBody">
+                        <!-- <tr>
                         <td>1</td>
                         <td>Ilaro - Abeokuta</td>
                         <td>Bus</td>
@@ -84,121 +90,325 @@
                             <button>Delete</button>
                         </td>
                     </tr> -->
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
         </div>
     </div>
     <script src="/assets/javascript/activity.js"></script>
+    <!-- ACTIVITY SYSTEM -->
     <script>
+        // ==========================================
+        // GET SAVED DATA
+        // ==========================================
+
         let fares = JSON.parse(localStorage.getItem("fares")) || [];
+        let routes = JSON.parse(localStorage.getItem("routes")) || [];
+
+
+        // ==========================================
+        // GET HTML ELEMENTS
+        // ==========================================
+
         const fareForm = document.getElementById("fareForm");
         const fareTableBody = document.getElementById("fareTableBody");
         const routeSelect = document.getElementById("routeName");
+        const fareSearch = document.getElementById("fareSearch");
 
-        const routes = JSON.parse(localStorage.getItem("routes")) || [];
-        console.log(routes);
 
-        routeSelect.innerHTML = "<option>Select Route</option>";
+        // ==========================================
+        // LOAD ROUTES INTO DROPDOWN
+        // ==========================================
 
-        routes.forEach(route => {
+        routeSelect.innerHTML =
+            '<option value="">Select Route</option>';
+
+        routes.forEach(function (route) {
+
             routeSelect.innerHTML += `
-                <option value="${route.departure} - ${route.destination}">
-                    ${route.departure} - ${route.destination}
-                </option>
-            `;
+        <option value="${route.departure} - ${route.destination}">
+            ${route.departure} - ${route.destination}
+        </option>
+       `;
 
         });
-        function displayFares() {
+
+
+        // ==========================================
+        // DISPLAY FARES
+        // ==========================================
+
+        function displayFares(fareList = fares) {
+
             fareTableBody.innerHTML = "";
-            fares.forEach((fare, index) => {
+
+            if (fareList.length === 0) {
+
+                fareTableBody.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    No fare records found.
+                </td>
+            </tr>
+        `;
+
+                return;
+            }
+
+
+            fareList.forEach(function (fare) {
+
+                // Find the original position of the fare
+                const originalIndex = fares.indexOf(fare);
+
                 fareTableBody.innerHTML += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${fare.route}</td>
-                        <td>${fare.vehicle}</td>
-                        <td>${fare.amount}</td>
-                        <td>
-                            <button onclick="deleteFare(${index})">Delete</button>
-                        </td>
-                    </tr>
-                `;
+            <tr>
+
+                <td>${originalIndex + 1}</td>
+
+                <td>${fare.route}</td>
+
+                <td>${fare.vehicle}</td>
+
+                <td>
+                    ₦${Number(fare.amount).toLocaleString()}
+                </td>
+
+                <td>
+                    <button onclick="deleteFare(${originalIndex})">
+                        Delete
+                    </button>
+                </td>
+
+            </tr>
+        `;
+
             });
+
         }
+
+
+        // ==========================================
+        // ADD NEW FARE
+        // ==========================================
+
         fareForm.addEventListener("submit", function (e) {
+
             e.preventDefault();
-            const route = document.getElementById("routeName").value;
-            const vehicle = document.getElementById("vehicleType").value;
-            const amount = document.getElementById("fareAmount").value;
+
+            const route =
+                document.getElementById("routeName").value;
+
+            const vehicle =
+                document.getElementById("vehicleType").value;
+
+            const amount =
+                document.getElementById("fareAmount").value;
+
+
+            // CHECK INPUTS
+
             if (
-                route === "Select Route" ||
+                route === "" ||
                 vehicle === "Vehicle Type" ||
                 amount === ""
             ) {
-                alert("Fill all fields");
-                return;
-            }
-            fares.push({
-                route: route,
-                vehicle: vehicle,
-                amount: amount,
-                date: new Date().toLocaleDateString("en-GB")
-            });
-            localStorage.setItem(
-                "routes",
-                JSON.stringify(routes)
-            );
 
-            addActivity("New route added: " + departure + " - " + destination);
-            fareForm.reset();
-            displayFares();
-        });
-        function deleteFare(index) {
-            fares.splice(index, 1);
+                alert("Please fill all fields.");
+
+                return;
+
+            }
+
+
+            // CREATE NEW FARE
+
+            const newFare = {
+
+                route: route,
+
+                vehicle: vehicle,
+
+                amount: amount,
+
+                date: new Date().toLocaleDateString("en-GB")
+
+            };
+
+
+            // ADD TO ARRAY
+
+            fares.push(newFare);
+
+
+            // SAVE TO LOCAL STORAGE
+
             localStorage.setItem(
                 "fares",
                 JSON.stringify(fares)
             );
+
+
+            // ADD ACTIVITY
+
+            addActivity(
+                "New fare added: " +
+                route +
+                " - ₦" +
+                Number(amount).toLocaleString()
+            );
+
+
+            // RESET FORM
+
+            fareForm.reset();
+
+
+            // DISPLAY UPDATED TABLE
+
             displayFares();
+
+        });
+
+
+        // ==========================================
+        // DELETE FARE
+        // ==========================================
+
+        function deleteFare(index) {
+
+            const deletedFare = fares[index];
+
+            if (!deletedFare) {
+                return;
+            }
+
+
+            if (!confirm("Are you sure you want to delete this fare?")) {
+                return;
+            }
+
+
+            fares.splice(index, 1);
+
+
+            localStorage.setItem(
+                "fares",
+                JSON.stringify(fares)
+            );
+
+
+            addActivity(
+                "Fare deleted: " +
+                deletedFare.route +
+                " - ₦" +
+                Number(deletedFare.amount).toLocaleString()
+            );
+
+
+            displayFares();
+
         }
+
+
+        // ==========================================
+        // SEARCH FARES
+        // ==========================================
+
+        fareSearch.addEventListener("input", function () {
+
+            const searchText =
+                fareSearch.value.toLowerCase().trim();
+
+
+            const filteredFares = fares.filter(function (fare) {
+
+                return (
+                    fare.route.toLowerCase().includes(searchText) ||
+
+                    fare.vehicle.toLowerCase().includes(searchText) ||
+
+                    String(fare.amount).includes(searchText)
+                );
+
+            });
+
+
+            displayFares(filteredFares);
+
+        });
+
+
+        // ==========================================
+        // DISPLAY SAVED FARES WHEN PAGE OPENS
+        // ==========================================
+
         displayFares();
     </script>
-    <script>
-        const menuBtn = document.getElementById("menuBtn");
-        const sidebar = document.querySelector(".sidebar");
-        const overlay = document.querySelector(".overlay");
 
-        menuBtn.addEventListener("click", () => {
+    <!-- HAMBURGER / SIDEBAR JAVASCRIPT -->
+    <script>
+
+        const menuBtn =
+            document.getElementById("menuBtn");
+
+        const sidebar =
+            document.querySelector(".sidebar");
+
+        const overlay =
+            document.querySelector(".overlay");
+
+
+        // OPEN / CLOSE SIDEBAR
+
+        menuBtn.addEventListener("click", function () {
 
             sidebar.classList.toggle("show");
-            overlay.classList.toggle("show");
+
+            overlay.classList.toggle("active");
+
 
             if (sidebar.classList.contains("show")) {
-                menuBtn.style.opacity = "0";
+
+                menuBtn.innerHTML = "✕";
+
             } else {
-                menuBtn.style.opacity = "1";
+
+                menuBtn.innerHTML = "☰";
+
             }
 
         });
 
-        overlay.addEventListener("click", () => {
+
+        // CLOSE WHEN CLICKING OVERLAY
+
+        overlay.addEventListener("click", function () {
 
             sidebar.classList.remove("show");
-            overlay.classList.remove("show");
-            menuBtn.style.opacity = "1";
+
+            overlay.classList.remove("active");
+
+            menuBtn.innerHTML = "☰";
 
         });
 
-        document.querySelectorAll(".sidebar a").forEach(link => {
 
-            link.addEventListener("click", () => {
+        // CLOSE SIDEBAR AFTER CLICKING A LINK
+
+        document.querySelectorAll(".sidebar a").forEach(function (link) {
+
+            link.addEventListener("click", function () {
 
                 sidebar.classList.remove("show");
-                overlay.classList.remove("show");
-                menuBtn.style.opacity = "1";
+
+                overlay.classList.remove("active");
+
+                menuBtn.innerHTML = "☰";
 
             });
 
         });
+
     </script>
 </body>
 

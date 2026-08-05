@@ -42,7 +42,7 @@
                 <input type="text" id="vehicleNumber" placeholder="Vehicle Number">
                 <select id="vehicleType">
                     <option value="">Vehicle Type</option>
-                    <option>Luxery Bus</option>
+                    <option>Luxury Bus</option>
                     <option>Mini Bus</option>
                     <option>Coaster Bus</option>
                 </select>
@@ -58,7 +58,11 @@
             </form>
         </div>
         <div class="table-box">
-            <h3>Vehicle Records</h3>
+            <div class="table-header">
+                <h3>Vehicle Records</h3>
+
+                <input type="text" id="vehicleSearch" placeholder="🔎 Search vehicles...">
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -115,33 +119,87 @@
     <script src="/assets/javascript/activity.js"></script>
     <script>
         let vehicles = JSON.parse(localStorage.getItem("vehicles")) || [];
+
         const form = document.getElementById("vehicleForm");
         const tableBody = document.getElementById("vehicleTableBody");
-        function displayVehicles() {
+        const searchInput = document.getElementById("vehicleSearch");
+
+        // DISPLAY VEHICLES
+        function displayVehicles(searchTerm = "") {
+
             tableBody.innerHTML = "";
-            vehicles.forEach((vehicle, index) => {
+
+            const search = searchTerm.toLowerCase().trim();
+
+            const filteredVehicles = vehicles
+                .map((vehicle, index) => ({ vehicle, index }))
+                .filter(({ vehicle }) => {
+
+                    return (
+                        String(vehicle.number).toLowerCase().includes(search) ||
+                        String(vehicle.type).toLowerCase().includes(search) ||
+                        String(vehicle.capacity).toLowerCase().includes(search) ||
+                        String(vehicle.driver).toLowerCase().includes(search) ||
+                        String(vehicle.status).toLowerCase().includes(search)
+                    );
+
+                });
+
+            if (filteredVehicles.length === 0) {
+
+                tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align:center;">
+                        No vehicles found
+                    </td>
+                </tr>
+            `;
+
+                return;
+            }
+
+            filteredVehicles.forEach(({ vehicle, index }) => {
+
                 tableBody.innerHTML += `
-                    <tr>
-                        <td>${index + 1}</td>    
-                        <td>${vehicle.number}</td>    
-                        <td>${vehicle.type}</td>    
-                        <td>${vehicle.capacity}</td>    
-                        <td>${vehicle.driver}</td>    
-                        <td>${vehicle.status}</td>    
-                        <td>
-                            <button onclick="deleteVehicle(${index})">Delete</button>
-                        </td>    
-                    </tr>
-                `;
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${vehicle.number}</td>
+                    <td>${vehicle.type}</td>
+                    <td>${vehicle.capacity}</td>
+                    <td>${vehicle.driver}</td>
+                    <td>${vehicle.status}</td>
+                    <td>
+                        <button onclick="deleteVehicle(${index})">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `;
+
             });
         }
+
+
+        // ADD VEHICLE
         form.addEventListener("submit", function (e) {
+
             e.preventDefault();
-            const vehicleNumber = document.getElementById("vehicleNumber").value;
-            const vehicleType = document.getElementById("vehicleType").value;
-            const capacity = document.getElementById("capacity").value;
-            const driverName = document.getElementById("driverName").value;
-            const status = document.getElementById("status").value;
+
+            const vehicleNumber =
+                document.getElementById("vehicleNumber").value.trim();
+
+            const vehicleType =
+                document.getElementById("vehicleType").value;
+
+            const capacity =
+                document.getElementById("capacity").value.trim();
+
+            const driverName =
+                document.getElementById("driverName").value.trim();
+
+            const status =
+                document.getElementById("status").value;
+
 
             if (
                 vehicleNumber === "" ||
@@ -150,37 +208,89 @@
                 driverName === "" ||
                 status === ""
             ) {
-                alert("Please fill all fields")
+
+                alert("Please fill all fields");
                 return;
+
             }
+
+
             vehicles.push({
+
                 number: vehicleNumber,
                 type: vehicleType,
                 capacity: capacity,
                 driver: driverName,
                 status: status
+
             });
+
+
+            // SAVE TO LOCAL STORAGE
             localStorage.setItem(
                 "vehicles",
                 JSON.stringify(vehicles)
             );
 
-            addActivity("Vehicle added: " + plateNumber);
+
+            // ACTIVITY
+            addActivity(
+                "Vehicle added: " + vehicleNumber
+            );
+
+
+            // CLEAR FORM
             form.reset();
+
+
+            // REFRESH TABLE
             displayVehicles();
+
         });
+
+
+        // DELETE VEHICLE
         function deleteVehicle(index) {
+
             if (confirm("Delete this vehicle?")) {
+
+                const deletedVehicle = vehicles[index];
+
                 vehicles.splice(index, 1);
+
+
                 localStorage.setItem(
                     "vehicles",
                     JSON.stringify(vehicles)
                 );
-                addActivity("Vehicle deleted");
-                displayVehicles();
+
+
+                addActivity(
+                    "Vehicle deleted: " +
+                    deletedVehicle.number
+                );
+
+
+                displayVehicles(
+                    searchInput.value
+                );
+
             }
+
         }
+
+
+        // SEARCH VEHICLES
+        searchInput.addEventListener("input", function () {
+
+            displayVehicles(this.value);
+
+        });
+
+
+        // INITIAL DISPLAY
         displayVehicles();
+
     </script>
     <script>
         const menuBtn = document.getElementById("menuBtn");
@@ -190,12 +300,12 @@
         menuBtn.addEventListener("click", () => {
 
             sidebar.classList.toggle("show");
-            overlay.classList.toggle("show");
+            overlay.classList.toggle("active");
 
             if (sidebar.classList.contains("show")) {
-                menuBtn.style.opacity = "0";
+                menuBtn.innerHTML = "✕";
             } else {
-                menuBtn.style.opacity = "1";
+                menuBtn.innerHTML = "☰";
             }
 
         });
@@ -203,8 +313,8 @@
         overlay.addEventListener("click", () => {
 
             sidebar.classList.remove("show");
-            overlay.classList.remove("show");
-            menuBtn.style.opacity = "1";
+            overlay.classList.remove("active");
+            menuBtn.innerHTML = "☰";
 
         });
 
@@ -213,13 +323,14 @@
             link.addEventListener("click", () => {
 
                 sidebar.classList.remove("show");
-                overlay.classList.remove("show");
-                menuBtn.style.opacity = "1";
+                overlay.classList.remove("active");
+                menuBtn.innerHTML = "☰";
 
             });
 
         });
     </script>
+
 </body>
 
 </html>

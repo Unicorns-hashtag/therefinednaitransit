@@ -80,12 +80,12 @@
         menuBtn.addEventListener("click", () => {
 
             sidebar.classList.toggle("show");
-            overlay.classList.toggle("show");
+            overlay.classList.toggle("active");
 
             if (sidebar.classList.contains("show")) {
-                menuBtn.style.opacity = "0";
+                menuBtn.innerHTML = "✕";
             } else {
-                menuBtn.style.opacity = "1";
+                menuBtn.innerHTML = "☰";
             }
 
         });
@@ -93,8 +93,8 @@
         overlay.addEventListener("click", () => {
 
             sidebar.classList.remove("show");
-            overlay.classList.remove("show");
-            menuBtn.style.opacity = "1";
+            overlay.classList.remove("active");
+            menuBtn.innerHTML = "☰";
 
         });
 
@@ -103,8 +103,8 @@
             link.addEventListener("click", () => {
 
                 sidebar.classList.remove("show");
-                overlay.classList.remove("show");
-                menuBtn.style.opacity = "1";
+                overlay.classList.remove("active");
+                menuBtn.innerHTML = "☰";
 
             });
 

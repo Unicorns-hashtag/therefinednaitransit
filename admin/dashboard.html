@@ -62,9 +62,12 @@
         </div>
         <!-- CONTENT SECTION  -->
         <div class="content">
-            <div class="box">
+            <div class="box revenue-box">
                 <h3>Revenue Chart</h3>
-                <p><canvas id="revenueChart"></canvas></p>
+
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
             </div>
             <div class="box">
                 <h3>Recent Activities</h3>
@@ -73,59 +76,167 @@
             </div>
         </div>
     </div>
-    <script src="/assets/javascript/activity.js"></script>
     <script>
 
-        // ======================
-        // LOAD DATA
-        // ======================
+        // ==========================================
+        // LOAD DATA FROM LOCAL STORAGE
+        // ==========================================
 
         const routes = JSON.parse(localStorage.getItem("routes")) || [];
         const vehicles = JSON.parse(localStorage.getItem("vehicles")) || [];
         const passengers = JSON.parse(localStorage.getItem("passengers")) || [];
         const fares = JSON.parse(localStorage.getItem("fares")) || [];
+        const activities = JSON.parse(localStorage.getItem("activities")) || [];
 
-        // ======================
+
+        // ==========================================
         // UPDATE DASHBOARD CARDS
-        // ======================
+        // ==========================================
 
         document.getElementById("routeCount").textContent = routes.length;
+
         document.getElementById("vehicleCount").textContent = vehicles.length;
+
         document.getElementById("passengerCount").textContent = passengers.length;
 
-        // Calculate total revenue
 
-        let totalRevenue = 0;
+        // ==========================================
+        // DISPLAY RECENT ACTIVITIES
+        // ==========================================
 
-        const labels = [];
-        const revenueData = [];
+        const activityList = document.getElementById("activityList");
+
+        activityList.innerHTML = "";
+
+        if (activities.length === 0) {
+
+            activityList.innerHTML = `
+            <li>No recent activities yet.</li>
+        `;
+
+        } else {
+
+            activities.forEach(activity => {
+
+                activityList.innerHTML += `
+                <li>
+                    <strong>${activity.message}</strong>
+                    <small>${activity.date}</small>
+                </li>
+            `;
+
+            });
+
+        }
+
+
+        // ==========================================
+        // GROUP FARES BY ROUTE
+        // IGNORE CAPITAL LETTER DIFFERENCES
+        // ==========================================
+
+        const routeTotals = {};
 
         fares.forEach(fare => {
 
-            const passengerCount =
-                passengers.filter(passenger =>
-                    passenger.route === fare.route
-                ).length;
+            // Clean the route name
+            // trim() removes unnecessary spaces
+            // toLowerCase() makes comparison case-insensitive
 
-            const revenue =
-                passengerCount * Number(fare.amount);
+            const routeKey = fare.route
+                .trim()
+                .toLowerCase();
 
-            labels.push(fare.route);
-            revenueData.push(revenue);
+            const amount = Number(fare.amount) || 0;
 
-            totalRevenue += revenue;
+
+            // If this route already exists,
+            // add the new fare to its total
+
+            if (routeTotals[routeKey]) {
+
+                routeTotals[routeKey].amount += amount;
+
+            }
+
+            // Otherwise create a new route
+
+            else {
+
+                routeTotals[routeKey] = {
+
+                    // Keep the first version of the route
+                    // for displaying on the chart
+
+                    name: fare.route.trim(),
+
+                    amount: amount
+
+                };
+
+            }
 
         });
+
+
+        // ==========================================
+        // CREATE CHART DATA
+        // ==========================================
+
+        const labels = [];
+
+        const revenueData = [];
+
+
+        Object.values(routeTotals).forEach(route => {
+
+            labels.push(route.name);
+
+            revenueData.push(route.amount);
+
+        });
+
+
+        // ==========================================
+        // CALCULATE TOTAL REVENUE
+        // ==========================================
+
+        const totalRevenue = revenueData.reduce(
+            (total, amount) => total + amount,
+            0
+        );
+
 
         document.getElementById("fareCount").textContent =
             "₦" + totalRevenue.toLocaleString();
 
+
         // ======================
-        // DRAW CHART
+        // DRAW REVENUE CHART
         // ======================
 
-        const ctx =
-            document.getElementById("revenueChart");
+        const ctx = document.getElementById("revenueChart");
+
+        // Find the highest revenue
+        const highestRevenue = Math.max(...revenueData, 0);
+
+        // Give the chart some breathing room
+        let chartMax;
+
+        if (highestRevenue === 0) {
+            chartMax = 1000;
+        } else if (highestRevenue <= 5000) {
+            chartMax = 6000;
+        } else if (highestRevenue <= 10000) {
+            chartMax = 12000;
+        } else if (highestRevenue <= 20000) {
+            chartMax = 25000;
+        } else if (highestRevenue <= 50000) {
+            chartMax = 60000;
+        } else {
+            chartMax = Math.ceil(highestRevenue / 10000) * 10000 + 10000;
+        }
+
 
         new Chart(ctx, {
 
@@ -147,7 +258,11 @@
 
                     borderWidth: 1,
 
-                    borderRadius: 8
+                    borderRadius: 8,
+
+                    barPercentage: 0.7,
+
+                    categoryPercentage: 0.8
 
                 }]
 
@@ -156,6 +271,8 @@
             options: {
 
                 responsive: true,
+
+                maintainAspectRatio: false,
 
                 plugins: {
 
@@ -169,7 +286,32 @@
 
                     y: {
 
-                        beginAtZero: true
+                        beginAtZero: true,
+
+                        max: chartMax,
+
+                        ticks: {
+
+                            callback: function (value) {
+
+                                return "₦" +
+                                    Number(value).toLocaleString();
+
+                            }
+
+                        }
+
+                    },
+
+                    x: {
+
+                        ticks: {
+
+                            maxRotation: 15,
+
+                            minRotation: 0
+
+                        }
 
                     }
 
@@ -180,6 +322,7 @@
         });
 
     </script>
+
 </body>
 
 </html>

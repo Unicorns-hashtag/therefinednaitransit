@@ -21,7 +21,7 @@
                 <p>
                     Manage transport routes, fares, passengers and reports from a single platform.
                 </p>
-                <img src="/images/download (1).jpeg" alt="bus">
+                <img src="/images/bus.png" alt="bus">
             </div>
         </div>
 
@@ -44,10 +44,70 @@
                     </div>
                     <button type="submit">Login</button>
                 </form>
-                <div class="links"><a href="#">Forgot Password?</a></div>
+                <div class="links">
+                    <a href="/admin/forgot-password.html" id="forgotPasswordLink">Forgot Password?</a>
+                </div>
                 <a href="/admin/index.html">Back to Home</a>
             </div>
         </div>
+    </div>
+    <!-- EMAIL MODAL -->
+    <div id="emailModal" class="modal">
+
+        <div class="modal-content">
+
+            <span class="close" id="closeEmail">&times;</span>
+
+            <h2>Forgot Password</h2>
+
+            <p>Enter your registered email address.</p>
+
+            <input type="email" id="forgotEmail" placeholder="Email Address">
+
+            <button id="sendOtpBtn">
+                Send OTP
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- OTP MODAL -->
+    <div id="otpModal" class="modal">
+
+        <div class="modal-content">
+
+            <h2>Verify OTP</h2>
+
+            <p id="otpMessage"></p>
+
+            <input type="text" id="otpInput" maxlength="6" placeholder="Enter 6-digit OTP">
+
+            <button id="verifyOtpBtn">
+                Verify OTP
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- NEW PASSWORD MODAL -->
+    <div id="passwordModal" class="modal">
+
+        <div class="modal-content">
+
+            <h2>Create New Password</h2>
+
+            <input type="password" id="newPassword" placeholder="New Password">
+
+            <input type="password" id="confirmPassword" placeholder="Confirm Password">
+
+            <button id="savePasswordBtn">
+                Save Password
+            </button>
+
+        </div>
+
     </div>
     <script>
 
@@ -92,6 +152,7 @@
         });
 
     </script>
+    <script src="/assets/javascript/forgot-password.js"></script>
 </body>
 
 </html>
