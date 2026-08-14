@@ -1,56 +1,110 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login | Nai's Transit</title>
+
     <link rel="stylesheet" href="/assets/css/login.css">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+
 </head>
 
 <body>
+
     <div class="container">
-        <!-- LEFT SECTION  -->
+
+        <!-- LEFT SECTION -->
         <div class="left-section">
+
             <div class="content">
+
                 <h1>Welcome Back</h1>
+
                 <p>
                     Manage transport routes, fares, passengers and reports from a single platform.
                 </p>
+
                 <img src="/images/bus.png" alt="bus">
+
             </div>
+
         </div>
 
-        <!-- RIGHT SECTION  -->
+
+        <!-- RIGHT SECTION -->
         <div class="right-section">
+
             <div class="login-box">
+
                 <h2>Login</h2>
+
                 <form id="loginForm">
+
                     <div class="input-group">
+
                         <label>Email Address</label>
-                        <input type="email" id="email" placeholder="Enter your email">
+
+                        <input type="email" id="email" placeholder="Enter your email" required>
+
                     </div>
+
+
                     <div class="input-group">
+
                         <label>Password</label>
-                        <input type="password" id="password" placeholder="Enter your password">
+
+                        <input type="password" id="password" placeholder="Enter your password" required>
+
                     </div>
+
+
+                    <!-- REMEMBER ME -->
                     <div class="remember">
-                        <input type="checkbox">
-                        <span>Remember Me</span>
+
+                        <input type="checkbox" id="rememberMe">
+
+                        <label for="rememberMe">
+                            Remember Me
+                        </label>
+
                     </div>
-                    <button type="submit">Login</button>
+
+
+                    <button type="submit">
+                        Login
+                    </button>
+
                 </form>
+
+
                 <div class="links">
-                    <a href="/admin/forgot-password.html" id="forgotPasswordLink">Forgot Password?</a>
+
+                    <a href="/admin/forgot-password.html">
+                        Forgot Password?
+                    </a>
+
                 </div>
-                <a href="/admin/index.html">Back to Home</a>
+
+
+                <a href="/admin/index.html">
+                    Back to Home
+                </a>
+
             </div>
+
         </div>
+
     </div>
+
+
     <!-- EMAIL MODAL -->
     <div id="emailModal" class="modal">
 
@@ -72,6 +126,7 @@
 
     </div>
 
+
     <!-- OTP MODAL -->
     <div id="otpModal" class="modal">
 
@@ -91,6 +146,7 @@
 
     </div>
 
+
     <!-- NEW PASSWORD MODAL -->
     <div id="passwordModal" class="modal">
 
@@ -109,50 +165,13 @@
         </div>
 
     </div>
-    <script>
 
-        const loginForm = document.getElementById("loginForm");
 
-        loginForm.addEventListener("submit", function (e) {
+    <script src="/assets/javascript/auth.js"></script>
 
-            e.preventDefault();
-
-            const email = document.getElementById("email").value.trim();
-
-            const password = document.getElementById("password").value.trim();
-
-            const user = JSON.parse(localStorage.getItem("user"));
-
-            if (!user) {
-
-                alert("No admin account found.");
-                return;
-
-            }
-
-            if (
-
-                email === user.email &&
-                password === user.password
-
-            ) {
-
-                alert("Login Successful!");
-
-                localStorage.setItem("loggedIn", "true");
-
-                window.location.href = "dashboard.html";
-
-            } else {
-
-                alert("Invalid Admin Credentials");
-
-            }
-
-        });
-
-    </script>
+    <!-- FORGOT PASSWORD SCRIPT -->
     <script src="/assets/javascript/forgot-password.js"></script>
+
 </body>
 
 </html>

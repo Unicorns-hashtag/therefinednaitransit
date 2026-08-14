@@ -29,7 +29,7 @@
             <li><a href="/admin/report.html">Reports</a></li>
             <li><a href="/admin/settings.html">Settings</a></li>
         </ul>
-        <a href="/admin/login.html" class="logout">Logout</a>
+        <a href="#" class="logout" onclick="logout()">Logout</a>
     </div>
     <!-- MAIN CONTENT  -->
     <div class="main">
@@ -94,6 +94,12 @@
                 </table>
         </div>
     </div>
+    <script src="/assets/javascript/auth.js"></script>
+    <script>
+        if (!isLoggedIn()) {
+            window.location.href = "/admin/login.html";
+        }
+    </script>
     <script src="/assets/javascript/activity.js"></script>
     <!-- ACTIVITY SYSTEM -->
     <script>
