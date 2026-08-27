@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Nai's Transit</title>
+    <link rel="stylesheet" href="/assets/css/sidebar.css">
+    <link rel="stylesheet" href="/assets/css/dash.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- SIDEBAR  -->
+    <button id="menuBtn">≡</button>
+    <div id="overlay"></div>
+    <div class="sidebar">
+        <h2>Nai's Transit</h2>
+        <ul>
+            <li class="active"><a href="/admin/dashboard.html">Dashboard</a></li>
+            <li><a href="/admin/routes.html">Routes</a></li>
+            <li><a href="/admin/fares.html">Fares</a></li>
+            <li><a href="/admin/vehicles.html">Vehicles</a></li>
+            <li><a href="/admin/passenger.html">Passengers</a></li>
+            <li><a href="/admin/report.html">Reports</a></li>
+            <li><a href="/admin/settings.html">Settings</a></li>
+        </ul>
+        <a href="#" class="logout" onclick="logout()">Logout</a>
+    </div>
+    <!-- MAIN CONTENT  -->
+    <div class="main">
+        <!-- TOP BAR  -->
+        <div class="topbar">
+            <h3>Dashboard</h3>
+            <div class="top-actions">
+                <span class="notification">🔔</span>
+                <div class="user">
+                    Admin
+                </div>
+            </div>
+        </div>
+        <!-- STAT CARDS -->
+        <div class="cards">
+            <div class="card">
+                <h4>Total Routes</h4>
+                <p class="counter" id="routeCount">0</p>
+            </div>
+            <div class="card">
+                <h4>Total Vehicles</h4>
+                <p class="counter" id="vehicleCount">0</p>
+            </div>
+            <div class="card">
+                <h4>Total Passengers</h4>
+                <p class="counter" id="passengerCount">0</p>
+            </div>
+            <div class="card">
+                <h4>Revenue</h4>
+                <p class="counter" id="fareCount">0</p>
+            </div>
+        </div>
+        <!-- CONTENT SECTION  -->
+        <div class="content">
+            <div class="box revenue-box">
+                <h3>Revenue Chart</h3>
+
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+            <div class="box activities-box">
+                <div class="activities-header">
+                    <h3>Recent Activities</h3>
+
+                    <button id="clearActivitiesBtn" class="clear-activities-btn">
+                        Clear Activities
+                    </button>
+                </div>
+                <ul class="activities" id="activityList">
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="/assets/javascript/auth.js"></script>
+    <script>
+        // ==========================================
+        // CHECK LOGIN
+        // ==========================================
+
+        if (!isLoggedIn()) {
+            window.location.href = "/admin/login.html";
+        }
+
+
+        // ==========================================
+        // LOAD DATA FROM LOCAL STORAGE
+        // ==========================================
+
+        const routes =
+            JSON.parse(localStorage.getItem("routes")) || [];
+
+        const vehicles =
+            JSON.parse(localStorage.getItem("vehicles")) || [];
+
+        const passengers =
+            JSON.parse(localStorage.getItem("passengers")) || [];
+
+        const fares =
+            JSON.parse(localStorage.getItem("fares")) || [];
+
+
+        // ==========================================
+        // UPDATE DASHBOARD CARDS
+        // ==========================================
+
+        document.getElementById("routeCount").textContent =
+            routes.length;
+
+        document.getElementById("vehicleCount").textContent =
+            vehicles.length;
+
+        document.getElementById("passengerCount").textContent =
+            passengers.length;
+
+
+        // ==========================================
+        // RECENT ACTIVITIES
+        // ==========================================
+
+        const activityList =
+            document.getElementById("activityList");
+
+        const clearActivitiesBtn =
+            document.getElementById("clearActivitiesBtn");
+
+
+        function displayActivities() {
+
+            // Always get the latest activities
+            // directly from localStorage
+
+            const activities =
+                JSON.parse(localStorage.getItem("activities")) || [];
+
+
+            activityList.innerHTML = "";
+
+
+            if (activities.length === 0) {
+
+                activityList.innerHTML = `
+                <li>No recent activities yet.</li>
+            `;
+
+                return;
+            }
+
+
+            // Newest activity appears first
+
+            activities.slice().reverse().forEach(activity => {
+
+                activityList.innerHTML += `
+                <li>
+                    <strong>${activity.message}</strong>
+                    <small>${activity.date}</small>
+                </li>
+            `;
+
+            });
+
+        }
+
+
+        // Display activities when dashboard opens
+
+        displayActivities();
+
+
+        // ==========================================
+        // CLEAR RECENT ACTIVITIES
+        // ==========================================
+
+        clearActivitiesBtn.addEventListener("click", function () {
+
+            const activities =
+                JSON.parse(localStorage.getItem("activities")) || [];
+
+
+            if (activities.length === 0) {
+
+                alert("There are no activities to clear.");
+
+                return;
+            }
+
+
+            const confirmClear = confirm(
+                "Are you sure you want to clear all recent activities?"
+            );
+
+
+            if (!confirmClear) {
+                return;
+            }
+
+
+            // Remove ONLY activities
+
+            localStorage.removeItem("activities");
+
+
+            // Refresh the list immediately
+
+            displayActivities();
+
+
+            alert("Recent activities cleared successfully.");
+
+        });
+
+
+        // ==========================================
+        // GROUP FARES BY ROUTE
+        // CASE-INSENSITIVE
+        // ==========================================
+
+        const routeTotals = {};
+
+
+        fares.forEach(fare => {
+
+            const routeKey =
+                fare.route.trim().toLowerCase();
+
+            const amount =
+                Number(fare.amount) || 0;
+
+
+            if (routeTotals[routeKey]) {
+
+                routeTotals[routeKey].amount += amount;
+
+            } else {
+
+                routeTotals[routeKey] = {
+
+                    name: fare.route.trim(),
+
+                    amount: amount
+
+                };
+
+            }
+
+        });
+
+
+        // ==========================================
+        // CREATE CHART DATA
+        // ==========================================
+
+        const labels = [];
+
+        const revenueData = [];
+
+
+        Object.values(routeTotals).forEach(route => {
+
+            labels.push(route.name);
+
+            revenueData.push(route.amount);
+
+        });
+
+
+        // ==========================================
+        // CALCULATE TOTAL REVENUE
+        // ==========================================
+
+        const totalRevenue =
+            revenueData.reduce(
+                (total, amount) => total + amount,
+                0
+            );
+
+
+        document.getElementById("fareCount").textContent =
+            "₦" + totalRevenue.toLocaleString();
+
+
+        // ==========================================
+        // DRAW REVENUE CHART
+        // ==========================================
+
+        const ctx =
+            document.getElementById("revenueChart");
+
+
+        const highestRevenue =
+            Math.max(...revenueData, 0);
+
+
+        let chartMax;
+
+
+        if (highestRevenue === 0) {
+
+            chartMax = 1000;
+
+        } else if (highestRevenue <= 5000) {
+
+            chartMax = 6000;
+
+        } else if (highestRevenue <= 10000) {
+
+            chartMax = 12000;
+
+        } else if (highestRevenue <= 20000) {
+
+            chartMax = 25000;
+
+        } else if (highestRevenue <= 50000) {
+
+            chartMax = 60000;
+
+        } else {
+
+            chartMax =
+                Math.ceil(highestRevenue / 10000) * 10000 + 10000;
+
+        }
+
+
+        new Chart(ctx, {
+
+            type: "bar",
+
+            data: {
+
+                labels: labels,
+
+                datasets: [{
+
+                    label: "Revenue (₦)",
+
+                    data: revenueData,
+
+                    backgroundColor: "#16a34a",
+
+                    borderColor: "#15803d",
+
+                    borderWidth: 1,
+
+                    borderRadius: 8,
+
+                    barPercentage: 0.7,
+
+                    categoryPercentage: 0.8
+
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+                        display: true
+                    }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        max: chartMax,
+
+                        ticks: {
+
+                            callback: function (value) {
+
+                                return "₦" +
+                                    Number(value).toLocaleString();
+
+                            }
+
+                        }
+
+                    },
+
+                    x: {
+
+                        ticks: {
+
+                            maxRotation: 15,
+
+                            minRotation: 0
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        });
+    </script>
+
+</body>
+
+</html>

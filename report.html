@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report | Nai's Transit</title>
+    <link rel="stylesheet" href="/assets/css/routes.css">
+    <link rel="stylesheet" href="/assets/css/sidebar.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+</head>
+
+<body>
+    <!-- SIDEBAR  -->
+    <button id="menuBtn">≡</button>
+    <div class="overlay"></div>
+    <div class="sidebar">
+        <h2>Nai's Transit</h2>
+        <ul>
+            <li><a href="/admin/dashboard.html">Dashboard</a></li>
+            <li><a href="/admin/routes.html">Routes</a></li>
+            <li><a href="/admin/fares.html">Fares</a></li>
+            <li><a href="/admin/vehicles.html">Vehicles</a></li>
+            <li><a href="/admin/passenger.html">Passengers</a></li>
+            <li class="active"><a href="/admin/report.html">Reports</a></li>
+            <li><a href="/admin/settings.html">Settings</a></li>
+        </ul>
+        <a href="#" class="logout" onclick="logout()">Logout</a>
+    </div>
+    <!-- MAIN CONTENT  -->
+    <div class="main">
+        <div class="topbar">
+            <h2>Reports & Analytics</h2>
+        </div>
+        <!-- SUMMARY CARDS  -->
+        <div class="card">
+            <h4>Total Routes</h4>
+            <p id="totalRoutes">0</p>
+        </div>
+
+        <div class="card">
+            <h4>Total Vehicles</h4>
+            <p id="totalVehicles">0</p>
+        </div>
+
+        <div class="card">
+            <h4>Total Passengers</h4>
+            <p id="totalPassengers">0</p>
+        </div>
+
+        <div class="card">
+            <h4>Total Revenue</h4>
+            <p id="totalRevenue">₦0</p>
+        </div>
+        <!-- REPORT TABLE  -->
+        <div class="table-box">
+            <h3>Transport Reports</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Route</th>
+                        <th>Passengers</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="/assets/javascript/auth.js"></script>
+    <script>
+        if (!isLoggedIn()) {
+            window.location.href = "/admin/login.html";
+        }
+    </script>
+    <script src="/assets/javascript/activity.js"></script>
+    <script>
+
+        // ==========================================
+        // LOAD DATA
+        // ==========================================
+
+        const routes =
+            JSON.parse(localStorage.getItem("routes")) || [];
+
+        const vehicles =
+            JSON.parse(localStorage.getItem("vehicles")) || [];
+
+        const passengers =
+            JSON.parse(localStorage.getItem("passengers")) || [];
+
+        const fares =
+            JSON.parse(localStorage.getItem("fares")) || [];
+
+
+        // ==========================================
+        // SUMMARY CARDS
+        // ==========================================
+
+        document.getElementById("totalRoutes").textContent =
+            routes.length;
+
+        document.getElementById("totalVehicles").textContent =
+            vehicles.length;
+
+        document.getElementById("totalPassengers").textContent =
+            passengers.length;
+
+
+        // ==========================================
+        // TOTAL REVENUE
+        // ==========================================
+
+        let revenue = 0;
+
+        fares.forEach(function (fare) {
+
+            revenue += Number(fare.amount) || 0;
+
+        });
+
+        document.getElementById("totalRevenue").textContent =
+            "₦" + revenue.toLocaleString();
+
+
+        // ==========================================
+        // REPORT TABLE
+        // ==========================================
+
+        const reportTableBody =
+            document.getElementById("reportTableBody");
+
+
+        // ==========================================
+        // CONVERT DATE TO A REAL DATE
+        // ==========================================
+
+        function getDateValue(dateString) {
+
+            if (!dateString) {
+                return 0;
+            }
+
+            // Expected format: DD/MM/YYYY
+
+            const parts = dateString.split("/");
+
+            if (parts.length !== 3) {
+                return 0;
+            }
+
+            const day = Number(parts[0]);
+            const month = Number(parts[1]) - 1;
+            const year = Number(parts[2]);
+
+            return new Date(
+                year,
+                month,
+                day
+            ).getTime();
+
+        }
+
+
+        // ==========================================
+        // SORT FARES
+        // NEWEST → OLDEST
+        // ==========================================
+
+        const sortedFares = fares
+            .map(function (fare, index) {
+
+                return {
+                    ...fare,
+                    originalIndex: index
+                };
+
+            })
+            .sort(function (a, b) {
+
+                const dateA = getDateValue(a.date);
+                const dateB = getDateValue(b.date);
+
+                // Newest dates first
+
+                if (dateA !== dateB) {
+                    return dateB - dateA;
+                }
+
+                // If dates are the same,
+                // newer stored records come first
+
+                return b.originalIndex - a.originalIndex;
+
+            });
+
+
+        // ==========================================
+        // DISPLAY REPORTS
+        // ==========================================
+
+        reportTableBody.innerHTML = "";
+
+        if (sortedFares.length === 0) {
+
+            reportTableBody.innerHTML = `
+        <tr>
+            <td colspan="4">
+                No transport reports available.
+            </td>
+        </tr>
+    `;
+
+        } else {
+
+            sortedFares.forEach(function (fare) {
+
+                // Make route comparison case-insensitive
+
+                const fareRoute =
+                    String(fare.route || "")
+                        .trim()
+                        .toLowerCase();
+
+
+                const passengerCount =
+                    passengers.filter(function (passenger) {
+
+                        const passengerRoute =
+                            String(passenger.route || "")
+                                .trim()
+                                .toLowerCase();
+
+                        return passengerRoute === fareRoute;
+
+                    }).length;
+
+
+                // Fix old records that don't have a date
+
+                const reportDate =
+                    fare.date || "Previous record";
+
+
+                reportTableBody.innerHTML += `
+            <tr>
+
+                <td>${reportDate}</td>
+
+                <td>${fare.route || "Unknown route"}</td>
+
+                <td>${passengerCount}</td>
+
+                <td>
+                    ₦${Number(fare.amount || 0).toLocaleString()}
+                </td>
+
+            </tr>
+        `;
+
+            });
+
+        }
+
+    </script>
+    <script>
+        const menuBtn = document.getElementById("menuBtn");
+        const sidebar = document.querySelector(".sidebar");
+        const overlay = document.querySelector(".overlay");
+
+        menuBtn.addEventListener("click", () => {
+
+            sidebar.classList.toggle("show");
+            overlay.classList.toggle("active");
+
+            if (sidebar.classList.contains("show")) {
+                menuBtn.innerHTML = "✕";
+            } else {
+                menuBtn.innerHTML = "☰";
+            }
+
+        });
+
+        overlay.addEventListener("click", () => {
+
+            sidebar.classList.remove("show");
+            overlay.classList.remove("active");
+            menuBtn.innerHTML = "☰";
+
+        });
+
+        document.querySelectorAll(".sidebar a").forEach(link => {
+
+            link.addEventListener("click", () => {
+
+                sidebar.classList.remove("show");
+                overlay.classList.remove("active");
+                menuBtn.innerHTML = "☰";
+
+            });
+
+        });
+    </script>
+</body>
+
+</html>
