@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkfare | Nai's Transit</title>
+    <link rel="stylesheet" href="/assets/css/checkfare.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="fare-card">
+
+            <h2>Check Transport Fare</h2>
+
+            <form id="fareForm">
+
+                <div class="search-box">
+                    <input type="text" id="departure" placeholder="Departure" autocomplete="off">
+
+                    <div id="departureList" class="suggestions"></div>
+                </div>
+
+                <div class="search-box">
+                    <input type="text" id="destination" placeholder="Destination" autocomplete="off">
+
+                    <div id="destinationList" class="suggestions"></div>
+                </div>
+
+                <button type="submit">
+                    Check Fare
+                </button>
+
+            </form>
+
+            <div id="fareModal" class="modal">
+
+                <div class="modal-content">
+
+                    <span id="closeModal">&times;</span>
+
+                    <div id="modalResult"></div>
+
+                    <button id="okBtn">OK</button>
+
+                </div>
+
+            </div>
+
+            <a href="/passenger/user-dashboard.html" class="back-btn">
+                Back to Dashboard
+            </a>
+
+        </div>
+
+    </div>
+    <script>
+        // =======================================
+        // MODAL ELEMENTS
+        // =======================================
+
+        const modal = document.getElementById("fareModal");
+        const modalResult = document.getElementById("modalResult");
+        const closeModal = document.getElementById("closeModal");
+        const okBtn = document.getElementById("okBtn");
+
+
+        // =======================================
+        // LOAD ROUTES FROM LOCAL STORAGE
+        // =======================================
+
+        const routes = JSON.parse(localStorage.getItem("routes")) || [];
+
+        const departures = [...new Set(routes.map(route => route.departure))];
+        const destinations = [...new Set(routes.map(route => route.destination))];
+
+
+        // =======================================
+        // AUTOCOMPLETE FUNCTION
+        // =======================================
+
+        function autocomplete(inputId, listId, data) {
+
+            const input = document.getElementById(inputId);
+            const list = document.getElementById(listId);
+
+            input.addEventListener("input", function () {
+
+                const value = input.value.trim().toLowerCase();
+
+                list.innerHTML = "";
+
+                if (value === "") {
+                    list.style.display = "none";
+                    return;
+                }
+
+                const matches = data.filter(item =>
+                    item.toLowerCase().includes(value)
+                );
+
+                if (matches.length === 0) {
+
+                    list.innerHTML = `
+                <div class="no-result">
+                    No matches found
+                </div>
+            `;
+
+                } else {
+
+                    matches.forEach(match => {
+
+                        const option = document.createElement("div");
+
+                        option.textContent = match;
+
+                        option.onclick = function () {
+
+                            input.value = match;
+                            list.style.display = "none";
+
+                        };
+
+                        list.appendChild(option);
+
+                    });
+
+                }
+
+                list.style.display = "block";
+
+            });
+
+            document.addEventListener("click", function (e) {
+
+                if (
+                    !input.contains(e.target) &&
+                    !list.contains(e.target)
+                ) {
+                    list.style.display = "none";
+                }
+
+            });
+
+        }
+
+
+        // =======================================
+        // ENABLE AUTOCOMPLETE
+        // =======================================
+
+        autocomplete(
+            "departure",
+            "departureList",
+            departures
+        );
+
+        autocomplete(
+            "destination",
+            "destinationList",
+            destinations
+        );
+
+
+        // =======================================
+        // CHECK FARE
+        // =======================================
+
+        document.getElementById("fareForm").addEventListener("submit", function (e) {
+
+            e.preventDefault();
+
+            const departure = document
+                .getElementById("departure")
+                .value
+                .trim()
+                .toLowerCase();
+
+            const destination = document
+                .getElementById("destination")
+                .value
+                .trim()
+                .toLowerCase();
+
+            const fares = JSON.parse(localStorage.getItem("fares")) || [];
+
+            const fareFound = fares.find(fare =>
+                fare.route.toLowerCase() ===
+                `${departure} - ${destination}`
+            );
+
+
+            // ROUTE NOT FOUND
+
+            if (!fareFound) {
+
+                modalResult.innerHTML = `
+            <h2>Route Not Found</h2>
+
+            <p>
+                Sorry, no fare is available for
+                <strong>
+                    ${departure} - ${destination}
+                </strong>
+            </p>
+        `;
+
+                modal.style.display = "flex";
+                return;
+            }
+
+
+            // ROUTE FOUND
+
+            modalResult.innerHTML = `
+
+        <h2>Fare Found</h2>
+
+        <p><strong>Departure</strong></p>
+
+        <p>${fareFound.route.split(" - ")[0]}</p>
+
+        <p style="font-size:30px;">⬇</p>
+
+        <p><strong>Destination</strong></p>
+
+        <p>${fareFound.route.split(" - ")[1]}</p>
+
+        <hr>
+
+        <h1 style="color:#16a34a;font-size:45px;">
+            ₦${Number(fareFound.amount).toLocaleString()}
+        </h1>
+
+    `;
+
+            modal.style.display = "flex";
+
+        });
+
+
+        // =======================================
+        // CLOSE MODAL
+        // =======================================
+
+        closeModal.onclick = function () {
+            modal.style.display = "none";
+        };
+
+        okBtn.onclick = function () {
+            modal.style.display = "none";
+        };
+
+        window.onclick = function (e) {
+
+            if (e.target === modal) {
+                modal.style.display = "none";
+            }
+
+        };
+    </script>
+</body>
+
+</html>

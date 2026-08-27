@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkfare | Nai's Transit</title>
+    <link rel="stylesheet" href="/assets/css/checkboard.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="fare-card">
+
+            <h2>Check Boarding Vehicle</h2>
+
+            <form id="boardForm">
+
+                <div class="search-box">
+                    <input type="text" id="departure" placeholder="Departure" autocomplete="off">
+                    <div id="departureList" class="suggestions"></div>
+                </div>
+
+                <div class="search-box">
+                    <input type="text" id="destination" placeholder="Destination" autocomplete="off">
+                    <div id="destinationList" class="suggestions"></div>
+                </div>
+
+                <button type="submit">
+                    Check Vehicle
+                </button>
+
+            </form>
+
+            <div id="boardModal" class="modal">
+
+                <div class="modal-content">
+
+                    <span id="closeModal">&times;</span>
+
+                    <div id="modalResult"></div>
+
+                    <button id="okBtn">OK</button>
+
+                </div>
+
+            </div>
+
+            <a href="/admin/index.html" class="back-btn">
+                Back to Home
+            </a>
+
+        </div>
+
+    </div>
+    <script>
+        // ==============================
+        // MODAL
+        // ==============================
+
+        const modal = document.getElementById("boardModal");
+        const modalResult = document.getElementById("modalResult");
+        const closeModal = document.getElementById("closeModal");
+        const okBtn = document.getElementById("okBtn");
+
+        // ==============================
+        // LOAD ROUTES
+        // ==============================
+
+        const routes =
+            JSON.parse(localStorage.getItem("routes")) || [];
+
+        const departures =
+            [...new Set(routes.map(route => route.departure))];
+
+        const destinations =
+            [...new Set(routes.map(route => route.destination))];
+
+        // ==============================
+        // AUTOCOMPLETE
+        // ==============================
+
+        function autocomplete(inputId, listId, data) {
+
+            const input = document.getElementById(inputId);
+            const list = document.getElementById(listId);
+
+            input.addEventListener("input", function () {
+
+                const value = input.value.trim().toLowerCase();
+
+                list.innerHTML = "";
+
+                if (value === "") {
+
+                    list.style.display = "none";
+                    return;
+
+                }
+
+                const matches = data.filter(item =>
+                    item.toLowerCase().includes(value)
+                );
+
+                if (matches.length === 0) {
+
+                    list.innerHTML =
+                        "<div class='no-result'>No matches found</div>";
+
+                }
+
+                else {
+
+                    matches.forEach(match => {
+
+                        const option = document.createElement("div");
+
+                        option.textContent = match;
+
+                        option.onclick = function () {
+
+                            input.value = match;
+                            list.style.display = "none";
+
+                        };
+
+                        list.appendChild(option);
+
+                    });
+
+                }
+
+                list.style.display = "block";
+
+            });
+
+            document.addEventListener("click", function (e) {
+
+                if (
+                    !input.contains(e.target) &&
+                    !list.contains(e.target)
+                ) {
+
+                    list.style.display = "none";
+
+                }
+
+            });
+
+        }
+
+        autocomplete(
+            "departure",
+            "departureList",
+            departures
+        );
+
+        autocomplete(
+            "destination",
+            "destinationList",
+            destinations
+        );
+
+        // ==============================
+        // CHECK VEHICLE
+        // ==============================
+
+        document.getElementById("boardForm")
+            .addEventListener("submit", function (e) {
+
+                e.preventDefault();
+
+                const departure =
+                    document.getElementById("departure")
+                        .value.trim().toLowerCase();
+
+                const destination =
+                    document.getElementById("destination")
+                        .value.trim().toLowerCase();
+
+                const vehicles =
+                    JSON.parse(localStorage.getItem("vehicles")) || [];
+
+                const routeName =
+                    `${departure} - ${destination}`;
+
+                const vehicleFound = vehicles.find(vehicle =>
+                    vehicle.route &&
+                    vehicle.route.toLowerCase() === routeName
+                );
+
+                if (vehicleFound) {
+
+                    modalResult.innerHTML = `
+
+        <h2>Vehicle Found</h2>
+
+        <p><strong>Departure</strong></p>
+
+        <p>${vehicleFound.route.split(" - ")[0]}</p>
+
+        <p style="font-size:30px;">↓</p>
+
+        <p><strong>Destination</strong></p>
+
+        <p>${vehicleFound.route.split(" - ")[1]}</p>
+
+        <br>
+
+        <h3>Vehicle Number</h3>
+
+        <h1>${vehicleFound.number}</h1>
+
+        <p>${vehicleFound.type}</p>
+
+        `;
+
+                    modal.style.display = "flex";
+
+                }
+
+                else {
+
+                    alert("Sorry! No vehicle has been assigned to this route.");
+
+                }
+
+            });
+
+        // ==============================
+        // CLOSE MODAL
+        // ==============================
+
+        closeModal.onclick = function () {
+
+            modal.style.display = "none";
+
+        }
+
+        okBtn.onclick = function () {
+
+            modal.style.display = "none";
+
+        }
+
+        window.onclick = function (e) {
+
+            if (e.target === modal) {
+
+                modal.style.display = "none";
+
+            }
+
+        }
+    </script>
+</body>
+
+</html>

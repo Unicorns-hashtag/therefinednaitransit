@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Registration</title>
+    <link rel="stylesheet" href="/assets/css/user-register.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="left-section">
+
+            <div class="content">
+
+                <h1>Join Nai's Transit</h1>
+
+                <p>
+                    Create your passenger account to check fares,
+                    manage your profile and enjoy seamless transport services.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="right-section">
+
+            <div class="register-box">
+
+                <h2>Passenger Registration</h2>
+
+                <form id="userRegisterForm">
+
+                    <div class="input-group">
+                        <label>Full Name</label>
+                        <input type="text" id="fullName">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" id="email">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="phone">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Username</label>
+                        <input type="text" id="username">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="password">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Confirm Password</label>
+                        <input type="password" id="confirmPassword">
+                    </div>
+
+                    <button type="submit">
+                        Create Account
+                    </button>
+
+                </form>
+
+                <div class="login-link">
+                    Already have an account?
+                    <a href="/passenger/user-login.html">
+                        Login
+                    </a>
+                </div>
+
+                <a href="/admin/index.html" class="home-link">
+                    ← Back to Home
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const form =
+            document.getElementById("userRegisterForm");
+
+        form.addEventListener("submit", function (e) {
+
+            e.preventDefault();
+
+            const fullName =
+                document.getElementById("fullName").value;
+
+            const email =
+                document.getElementById("email").value;
+
+            const phone =
+                document.getElementById("phone").value;
+
+            const username =
+                document.getElementById("username").value;
+
+            const password =
+                document.getElementById("password").value;
+
+            const confirmPassword =
+                document.getElementById("confirmPassword").value;
+
+            if (
+                fullName === "" ||
+                email === "" ||
+                phone === "" ||
+                username === "" ||
+                password === "" ||
+                confirmPassword === ""
+            ) {
+                alert("Please fill all fields");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert("Passwords do not match");
+                return;
+            }
+
+            const passenger = {
+                fullName,
+                email,
+                phone,
+                username,
+                password
+            };
+
+            localStorage.setItem(
+                "passenger",
+                JSON.stringify(passenger)
+            );
+
+            alert("Registration Successful");
+
+            window.location.href =
+                "user-login.html";
+
+        });
+
+    </script>
+
+</body>
+
+</html>

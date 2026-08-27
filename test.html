@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test OTP</title>
+</head>
+<body>
+
+<h2>Test OTP Email</h2>
+
+<button onclick="sendOTP()">Send OTP</button>
+
+<script>
+async function sendOTP(){
+
+    const response = await fetch("http://localhost:5000/send-otp",{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+            email:"stephennaomi254@gmail.com"
+
+        })
+
+    });
+
+    const data = await response.json();
+
+    console.log(data);
+
+    alert(data.message || "Done");
+
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Dashboard | Nai's Transit</title>
+    <link rel="stylesheet" href="/assets/css/user-dashboard.css">
+</head>
+
+<body>
+
+    <div class="dashboard">
+
+        <div class="header">
+            <h2>Passenger Dashboard</h2>
+            <a href="/admin/index.html" class="logout">Logout</a>
+        </div>
+
+        <div class="welcome-card">
+            <h3 id="welcomeText">Welcome</h3>
+            <p>Manage your profile and check transport fares.</p>
+        </div>
+
+        <div class="cards">
+
+            <div class="card">
+                <h4>Check Fare</h4>
+                <p>View transport fares instantly.</p>
+                <a href="/passenger/checkfare.html">Open</a>
+            </div>
+
+            <div class="card">
+                <h4>My Profile</h4>
+                <p>View your account details.</p>
+                <a href="/passenger/profile.html">Open</a>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const passenger = JSON.parse(localStorage.getItem("passenger"));
+
+        if (passenger) {
+            document.getElementById("welcomeText").textContent =
+                "Welcome, " + passenger.username;
+        }
+    </script>
+
+</body>
+
+</html>
