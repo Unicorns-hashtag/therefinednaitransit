@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fares | Nai's Transit</title>
-    <link rel="stylesheet" href="/assets/css/sidebar.css">
-    <link rel="stylesheet" href="/assets/css/routes.css">
+    <link rel="stylesheet" href="../assets/css/sidebar.css">
+    <link rel="stylesheet" href="../assets/css/routes.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet"
@@ -21,13 +21,13 @@
     <div class="sidebar">
         <h2>Nai's Transit</h2>
         <ul>
-            <li><a href="/admin/dashboard.html">Dashboard</a></li>
-            <li><a href="/admin/routes.html">Routes</a></li>
-            <li class="active"><a href="/admin/fares.html">Fares</a></li>
-            <li><a href="/admin/vehicles.html">Vehicles</a></li>
-            <li><a href="/admin/passenger.html">Passengers</a></li>
-            <li><a href="/admin/report.html">Reports</a></li>
-            <li><a href="/admin/settings.html">Settings</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="routes.html">Routes</a></li>
+            <li class="active"><a href="fares.html">Fares</a></li>
+            <li><a href="vehicles.html">Vehicles</a></li>
+            <li><a href="passenger.html">Passengers</a></li>
+            <li><a href="report.html">Reports</a></li>
+            <li><a href="settings.html">Settings</a></li>
         </ul>
         <a href="#" class="logout" onclick="logout()">Logout</a>
     </div>
@@ -100,13 +100,13 @@
                 </table>
         </div>
     </div>
-    <script src="/assets/javascript/auth.js"></script>
+    <script src="../assets/javascript/auth.js"></script>
     <script>
         if (!isLoggedIn()) {
-            window.location.href = "/admin/login.html";
+            window.location.href = "login.html";
         }
     </script>
-    <script src="/assets/javascript/activity.js"></script>
+    <script src="../assets/javascript/activity.js"></script>
     <!-- ACTIVITY SYSTEM -->
     <script>
         // ==========================================
@@ -117,7 +117,6 @@
         let routes = JSON.parse(localStorage.getItem("routes")) || [];
 
 
-
         // ==========================================
         // GET HTML ELEMENTS
         // ==========================================
@@ -126,7 +125,6 @@
         const fareTableBody = document.getElementById("fareTableBody");
         const routeSelect = document.getElementById("routeName");
         const fareSearch = document.getElementById("fareSearch");
-        const clearFaresBtn = document.getElementById("clearFaresBtn");
 
 
         // ==========================================
@@ -147,50 +145,57 @@
         });
 
 
-        function displayFares(searchText = "") {
+        // ==========================================
+        // DISPLAY FARES
+        // ==========================================
+
+        function displayFares(fareList = fares) {
 
             fareTableBody.innerHTML = "";
 
-            const search = searchText.toLowerCase().trim();
-
-            fares.forEach((fare, index) => {
-
-                const route = fare.route.toLowerCase();
-                const vehicle = fare.vehicle.toLowerCase();
-                const amount = String(fare.amount);
-
-                const matches =
-                    route.includes(search) ||
-                    vehicle.includes(search) ||
-                    amount.includes(search);
-
-                if (!matches) return;
-
-                fareTableBody.innerHTML += `
-            <tr>
-                <td>${index + 1}</td>
-                <td>${fare.route}</td>
-                <td>${fare.vehicle}</td>
-                <td>₦${Number(fare.amount).toLocaleString()}</td>
-                <td>
-                    <button onclick="deleteFare(${index})">
-                        Delete
-                    </button>
-                </td>
-            </tr>
-        `;
-            });
-
-            if (fareTableBody.innerHTML === "") {
+            if (fareList.length === 0) {
 
                 fareTableBody.innerHTML = `
             <tr>
-                <td colspan="5" style="text-align:center;">
-                    No matching fares found.
+                <td colspan="5">
+                    No fare records found.
                 </td>
             </tr>
         `;
+
+                return;
             }
+
+
+            fareList.forEach(function (fare) {
+
+                // Find the original position of the fare
+                const originalIndex = fares.indexOf(fare);
+
+                fareTableBody.innerHTML += `
+            <tr>
+
+                <td>${originalIndex + 1}</td>
+
+                <td>${fare.route}</td>
+
+                <td>${fare.vehicle}</td>
+
+                <td>
+                    ₦${Number(fare.amount).toLocaleString()}
+                </td>
+
+                <td>
+                    <button onclick="deleteFare(${originalIndex})">
+                        Delete
+                    </button>
+                </td>
+
+            </tr>
+        `;
+
+            });
+
         }
 
 
@@ -276,42 +281,6 @@
 
         });
 
-        // =========================
-        // CLEAR ALL FARES
-        // =========================
-
-        clearFaresBtn.addEventListener("click", function () {
-
-            const currentFares =
-                JSON.parse(localStorage.getItem("fares")) || [];
-
-            if (currentFares.length === 0) {
-
-                alert("There are no fares to clear.");
-
-                return;
-            }
-
-            const confirmClear = confirm(
-                "Are you sure you want to clear all fare records?"
-            );
-
-            if (!confirmClear) return;
-
-            // Clear only fares
-
-            localStorage.removeItem("fares");
-
-            fares.length = 0;
-
-            displayFares();
-
-            addActivity("All fares cleared");
-
-            alert("All fare records have been cleared successfully.");
-
-        });
-
 
         // ==========================================
         // DELETE FARE
@@ -379,15 +348,7 @@
             displayFares(filteredFares);
 
         });
-        // =========================
-        // LIVE SEARCH
-        // =========================
 
-        fareSearch.addEventListener("input", function () {
-
-            displayFares(this.value);
-
-        });
 
         // ==========================================
         // DISPLAY SAVED FARES WHEN PAGE OPENS
@@ -460,6 +421,41 @@
 
         });
 
+    </script>
+    <script>
+        // =========================
+        // CLEAR ALL FARES
+        // =========================
+
+        const clearFaresBtn = document.getElementById("clearFaresBtn");
+
+        clearFaresBtn.addEventListener("click", function () {
+
+            if (fares.length === 0) {
+                alert("There are no fare records to clear.");
+                return;
+            }
+
+            const confirmClear = confirm(
+                "Are you sure you want to clear all fare records?"
+            );
+
+            if (!confirmClear) {
+                return;
+            }
+
+            fares = [];
+
+            localStorage.setItem(
+                "fares",
+                JSON.stringify(fares)
+            );
+
+            addActivity("All fare records cleared");
+
+            displayFares();
+
+        });
     </script>
 </body>
 

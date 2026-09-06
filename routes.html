@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Routes | Nai's Transit</title>
-    <link rel="stylesheet" href="/assets/css/routes.css">
-    <link rel="stylesheet" href="/assets/css/sidebar.css">
+    <link rel="stylesheet" href="../assets/css/routes.css">
+    <link rel="stylesheet" href="../assets/css/sidebar.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet"
@@ -21,13 +21,13 @@
     <div class="sidebar">
         <h2>Nai's Transit</h2>
         <ul>
-            <li><a href="/admin/dashboard.html">Dashboard</a></li>
-            <li class="active"><a href="/admin/routes.html">Routes</a></li>
-            <li><a href="/admin/fares.html">Fares</a></li>
-            <li><a href="/admin/vehicles.html">Vehicles</a></li>
-            <li><a href="/admin/passenger.html">Passengers</a></li>
-            <li><a href="/admin/report.html">Reports</a></li>
-            <li><a href="/admin/settings.html">Settings</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li class="active"><a href="routes.html">Routes</a></li>
+            <li><a href="fares.html">Fares</a></li>
+            <li><a href="vehicles.html">Vehicles</a></li>
+            <li><a href="passenger.html">Passengers</a></li>
+            <li><a href="report.html">Reports</a></li>
+            <li><a href="settings.html">Settings</a></li>
         </ul>
         <a href="#" class="logout" onclick="logout()">Logout</a>
     </div>
@@ -51,7 +51,6 @@
             <div class="table-header">
                 <h3>Available Routes</h3>
 
-
                 <div class="table-actions">
                     <input type="text" id="routeSearch" placeholder="🔎 Search routes...">
 
@@ -59,10 +58,7 @@
                         Clear Routes
                     </button>
                 </div>
-
-
             </div>
-
             <table>
                 <thead>
                     <tr>
@@ -78,20 +74,19 @@
             </table>
         </div>
     </div>
-    <script src="/assets/javascript/auth.js"></script>
+    <script src="../assets/javascript/auth.js"></script>
     <script>
         if (!isLoggedIn()) {
-            window.location.href = "/admin/login.html";
+            window.location.href = "login.html";
         }
     </script>
-    <script src="/assets/javascript/activity.js"></script>
+    <script src="../assets/javascript/activity.js"></script>
     <script>
         let routes = JSON.parse(localStorage.getItem("routes")) || [];
 
         const form = document.getElementById("routeForm");
         const tableBody = document.getElementById("routeTableBody");
         const routeSearch = document.getElementById("routeSearch");
-        const clearRoutesBtn = document.getElementById("clearRoutesBtn");
 
 
         // =========================
@@ -243,16 +238,12 @@
         // CLEAR ALL ROUTES
         // =========================
 
+        const clearRoutesBtn = document.getElementById("clearRoutesBtn");
+
         clearRoutesBtn.addEventListener("click", function () {
 
-
-            const currentRoutes =
-                JSON.parse(localStorage.getItem("routes")) || [];
-
-            if (currentRoutes.length === 0) {
-
+            if (routes.length === 0) {
                 alert("There are no routes to clear.");
-
                 return;
             }
 
@@ -264,24 +255,18 @@
                 return;
             }
 
-            // Clear ONLY routes
-            localStorage.removeItem("routes");
+            routes = [];
 
-            // Update local array
-            routes.length = 0;
+            localStorage.setItem(
+                "routes",
+                JSON.stringify(routes)
+            );
 
-            // Refresh table
-            displayRoutes(routeSearch.value);
-
-            // Record activity
             addActivity("All routes cleared");
 
-            alert("All routes have been cleared successfully.");
-
+            displayRoutes(routeSearch.value);
 
         });
-
-
 
         // =========================
         // LIVE SEARCH
